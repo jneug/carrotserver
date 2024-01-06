@@ -1,0 +1,59 @@
+Return-Path: <>
+Delivered-To: %4$s
+Date: %3$ta, %3$td %3$tb %3$tY %3$tH:%3$tM:%3$tS %3$tz
+From: Mail Delivery System <MAILER-DAEMON@%2$s>
+Subject: Undelivered Mail Returned to Sender
+To: %4$s
+Auto-Submitted: auto-replied
+MIME-Version: 1.0
+Content-Type: multipart/report; report-type=delivery-status
+Content-Type: multipart/report; report-type=delivery-status;
+    boundary="%1$s.%3$tN/%2$s"
+Content-Transfer-Encoding: 8bit
+Message-Id: <%1$s@%2$s>
+
+This is a MIME-encapsulated message.
+
+--%1$s.%3$tN/%2$s
+%2$s
+Content-Description: Notification
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+This is the mail system at host %2$s.
+
+I'm sorry to have to inform you that your message could not
+be delivered to one or more recipients. It's attached below.
+
+For further assistance, please send mail to postmaster.
+
+If you do so, please include this problem report. You can
+delete your own text from the attached returned message.
+
+                  The mail system
+
+<%5$s>: host said:
+    550 TinyServ can't deliver messages to other servers. Sorry! :-(
+
+--%1$s.%3$tN/%2$s
+Content-Description: Delivery report
+Content-Type: message/delivery-status
+
+Reporting-MTA: dns; %2$s
+Arrival-Date: %3$ta, %3$td %3$tb %3$tY %3$tH:%3$tM:%3$tS %3$tz
+
+Final-Recipient: rfc822; %5$s
+Original-Recipient: rfc822;%5$s
+Action: failed
+Status: 5.0.0
+Remote-MTA: dns; %5$s
+Diagnostic-Code: smtp; 550 TinyServ can't deliver messages to other servers. Sorry! :-(
+
+--%1$s.%3$tN/%2$s
+Content-Description: Undelivered Message
+Content-Type: message/rfc822
+Content-Transfer-Encoding: 8bit
+
+%6$s
+
+--%1$s.%3$tN/%2$s--

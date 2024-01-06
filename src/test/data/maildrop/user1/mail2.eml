@@ -1,0 +1,18 @@
+Date: Wed, 13 Sep 2023 17:45:12 +0200
+From: J. Neugebauer <j.neugebauer@helmholtz-gym.de>
+To: user1 <user1@tinyserv.local>
+Subject: Die zweite Mail
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hallo user1,
+
+dies ist die zweite Mail in Deinem Postfach.
+
+Einige Befehle haben besondere Formate für die
+Ein- und Ausgabe. Probiert doch mal den 'STAT' Befehl
+aus und vergleich die Antwort mit der des 'LIST' 
+Befehls. Gibt es Gemeinsamkeiten?
+
+LG, NGB

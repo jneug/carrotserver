@@ -1,0 +1,18 @@
+﻿Date: Thu, 14 Sep 2017 10:12:55 +0200
+From: Jonas Neugebauer <schule@neugebauer.cc>
+To: user3 <user3@babypop3.de>
+Subject: Die zweite Mail
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hallo user3,
+
+dies ist die zweite Mail in eurem Postfach.
+
+Einige Befehle haben besondere Formate fuer die
+Ein- und Ausgabe. Probiert doch mal den 'STAT' Befehl
+aus und vergleich die Antwort mit der des 'LIST' 
+Befehls. Gibt es Gemeinsamkeiten?
+
+NGB

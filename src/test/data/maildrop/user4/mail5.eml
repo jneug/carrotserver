@@ -1,0 +1,27 @@
+﻿Date: Sat, 16 Sep 2017 01:01:01 +0200
+From: NGB <schule@neugebauer.cc>
+To: user3 <user3@babypop3.de>
+Subject: Mutig voran!
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hallo user3,
+
+Wenn ihr das POP3 Protokoll umfassend erforscht habt, koennt 
+ihr ja mal versuchen, eine Mail von eurem eigenen Konto abzurufen.
+
+Die Adresse des POP3-Servers findet ihr auf den Seiten eures
+Mailanbieters. Fuer GMX benutzt ihr:
+
+telnet pop.gmx.de 110
+
+
+Oder ihr ruft die Mail vom Beginn der Stunde von meinem
+Server ab:
+
+telnet pop3.neugebauer.cc 110
+USER informatik@neugebauer.cc
+PASS ifq2_user1
+
+NGB

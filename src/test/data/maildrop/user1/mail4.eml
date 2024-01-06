@@ -1,0 +1,30 @@
+Date: Sat, 16 Sep 2017 01:01:01 +0200
+From: NGB <schule@neugebauer.cc>
+To: user1 <user1@babypop3.de>
+Subject: Mutig voran!
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hallo user1,
+
+Wenn Du das POP3-Protokoll umfassend erforscht hast, kannst
+Du ja mal versuchen, eine E-Mail von Deinem eigenen Konto abzurufen.
+Die Adresse des POP3-Servers findet ihr auf den Seiten eures
+Mailanbieters.
+
+Für GMX benutzt ihr beispielsweise:
+
+telnet pop.gmx.de 110
+
+Du kannst es auch mit einem von mir vorbereiteten Postfach versuchen:
+
+telnet pop3.neugebauer.cc 110
+USER informatik@neugebauer.cc
+PASS ifq2_user1
+
+
+HINWEIS:
+Da POP3 unverschlüsselt ist und daher unsicher, erlauben die meisten im Internet erreichbaren Server heutzutage keine unverschlüsselten POP3-Verbindungen mehr. Es kann also sein, dass Du mit dem Abruf keinen Erfolg hast.
+
+NGB
