@@ -6,6 +6,7 @@ import schule.ngb.carrot.events.ServerListener;
 import schule.ngb.carrot.protocol.ProtocolHandler;
 import schule.ngb.carrot.protocol.ProtocolHandlerFactory;
 import schule.ngb.carrot.util.Log;
+import schule.ngb.carrot.util.Timer;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -17,37 +18,100 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+
+/**
+ * Die Hauptklasse für einen Server, der über einen {@link ServerSocket} auf Verbindungen wartet und
+ * für diese einen neuen {@link ProtocolHandler} instanziiert.
+ * <p>
+ * Jeder Client wird in einem eigenen Thread abgearbeitet. Der zugehörige {@code ProtocolHandler}
+ * wird mit der zugewiesenen {@link ProtocolHandlerFactory} erstellt.
+ * <p>
+ * Falls ein {@link #setConnectionTimeout(int) Timeout} eingestellt ist, werden bestehende
+ * Verbindungen automatisch getrennt, wenn vor Ablauf des Timeouts keine Befehle empfangen wurden.
+ * Dazu muss jeder {@code ProtocolHandler} einen internen {@link Timer} verwalten und bei
+ * eingehenden Befehlen {@link Timer#reset() zurücksetzen}. Anhand des Zustands des Timers
+ * entscheidet der Server, ob die Verbindung getrennt wird. (Die Prüfung der Timeouts findet in
+ * einem eigenen Thread statt und wird nicht durch das Warten auf eingehende Verbindungen
+ * blockiert.)
+ * <p>
+ * Events wie der Start ud Stopp des Servers, die Verbindung von Clients und Trennung von
+ * Verbindungen durch Timeout oder regulär können von {@link ServerListener}n abonniert werden.
+ */
 public class Server implements Runnable {
 
+	/**
+	 * Socket timeout (in ms), wie lange jeweils auf eingehende Verbindungen gewartet wird. Je höher
+	 * der Wert, desto länger braucht der Server, um vollständig zu stoppen.
+	 */
 	private static final int SO_TIMEOUT = 500;
 
+	/**
+	 * Zeitverzögerung (in ms) beim Stoppen des Servers. So lange wird gewartet, bis alle
+	 * bestehenden Verbindungen geschlossen wurden. Spätestens danach wird der Socket geschlossen.
+	 */
 	private static final int TERMINATION_TIMEOUT = 3000;
 
 
+	// Logger
 	private static final Log LOG = Log.getLogger(Server.class);
 
 
+	/**
+	 * Port, auf dem der Server auf Verbindungen wartet.
+	 */
 	private int port;
 
+	/**
+	 * Ob der Server gerade läuft und Verbindungen entgegen nimmt.
+	 */
 	private boolean running = false;
 
+	/**
+	 * Timeout für Verbindungen.
+	 */
 	private int connectionTimeout = -1;
 
+	/**
+	 * Timer-Thread für den Timeout.
+	 */
 	private final Runnable timer;
 
+	/**
+	 * Factory für {@link ProtocolHandler} dieses Servers.
+	 */
 	private final ProtocolHandlerFactory factory;
 
+	/**
+	 * Executor, auf dem die {@link ProtocolHandler} ausgeführt werden.
+	 */
 	private /*final*/ ExecutorService exec;
 
+	/**
+	 * Liste der Verbindungen. Nach jedem {@link #SO_TIMEOUT} wird die List bereinigt und
+	 * geschlossene Verbindungen entfernt.
+	 */
 	private final ArrayList<ProtocolHandler> connections;
 
+	/**
+	 * Dispatcher für Server-Events.
+	 */
 	private final EventDispatcher<ServerEvent, ServerListener> dispatcher;
 
+
+	/**
+	 * Erstellt einen Server auf dem angegebenen Port für das angegebenen Protokoll.
+	 * <p>
+	 * ist der {@code port = 0}, dann wird ein zufälliger, freier Port gewählt.
+	 *
+	 * @param port Port, auf dem der Server Verbindungen entgegennimmt.
+	 * @param phFactory Factory für die {@link ProtocolHandler}.
+	 */
 	public Server( int port, ProtocolHandlerFactory phFactory ) {
 		this.port = port;
 		this.factory = phFactory;
 		this.connections = new ArrayList<>();
 
+		// Events vorbereiten
 		this.dispatcher = new EventDispatcher<>();
 		this.dispatcher.registerEventType("started", ( e, l ) -> l.started(e));
 		this.dispatcher.registerEventType("stopped", ( e, l ) -> l.stopped(e));
@@ -55,6 +119,7 @@ public class Server implements Runnable {
 		this.dispatcher.registerEventType("disconnected", ( e, l ) -> l.clientDisconnected(e));
 		this.dispatcher.registerEventType("timeout", ( e, l ) -> l.clientTimeout(e));
 
+		// Timeout-Thread vorbereiten
 		timer = new Runnable() {
 			@Override
 			public void run() {
@@ -77,48 +142,92 @@ public class Server implements Runnable {
 		};
 	}
 
-	public String getName() {
+	/**
+	 * Liefert den Namen des Protokolle, das auf diesem Server läuft.
+	 *
+	 * @return
+	 */
+	public String getProtocolName() {
 		return this.factory.getName();
 	}
 
+	/**
+	 * Liefert den Port des Servers.
+	 *
+	 * @return Der Port, auf dem der Server läuft.
+	 */
 	public int getPort() {
 		return port;
 	}
 
+	/**
+	 * Setzt den Port des Servers.
+	 * <p>
+	 * Wenn der Server {@link #isRunning() läuft}, wird der Aufruf ignoriert.
+	 *
+	 * @param port Der neue Port des Servers.
+	 */
 	public void setPort( int port ) {
 		if( !this.running ) {
 			this.port = port;
 		}
 	}
 
+	/**
+	 * Liefert, ob der Server derzeit läuft und auf Verbindungsanfragen reagiert.
+	 *
+	 * @return {@code true}, wenn der Server-Thread läuft.
+	 */
 	public boolean isRunning() {
 		return running;
 	}
 
+	/**
+	 * Liefert den derzeit eingestellten Verbindungstimeout.
+	 *
+	 * @return Der Timeout für Verbindungen in Millisekunden.
+	 */
 	public int getConnectionTimeout() {
 		return connectionTimeout;
 	}
 
+	/**
+	 * Setzt den Verbindungstimeout des Servers.
+	 * <p>
+	 * Wenn der Server {@link #isRunning() läuft}, wird der Aufruf ignoriert.
+	 *
+	 * @param connectionTimeout Der neue Verbindungstimeout.
+	 */
 	public void setConnectionTimeout( int connectionTimeout ) {
 		if( !this.running ) {
 			this.connectionTimeout = connectionTimeout;
 		}
 	}
 
+	/**
+	 * Startet den Server, sofern er nicht schon läuft.
+	 */
 	public void start() {
-		// Initialize
-		this.exec = Executors.newCachedThreadPool();
-		this.connections.clear();
+		if( !isRunning() ) {
+			// Initialize
+			this.exec = Executors.newCachedThreadPool();
+			this.connections.clear();
 
-		Thread runner = new Thread(this);
-		// Configure thread
-		runner.start();
+			Thread runner = new Thread(this);
+			// Configure thread
+			runner.start();
+		}
 	}
 
+	/**
+	 * Stoppt den Server und trennt alle bestehenden Verbindungen. Der Server kann danach wieder
+	 * {@link #start() neugestartet} werden.
+	 */
 	public void close() {
 		this.running = false;
 	}
 
+	@Override
 	public void run() {
 		try( final ServerSocket serverSocket = new ServerSocket(this.port) ) {
 			serverSocket.setSoTimeout(SO_TIMEOUT);
@@ -168,17 +277,26 @@ public class Server implements Runnable {
 
 			dispatch("stopped");
 		} catch( IllegalArgumentException e ) {
-			LOG.warn("Port number %d for server %s out of range", this.port, this.getName());
+			LOG.warn("Port number %d for server %s out of range", this.port, this.getProtocolName());
 		} catch( IOException | InterruptedException ignored ) {
 		}
 	}
 
-
+	/**
+	 * Trennt alle bestehenden Verbindungen ohne den Server zu stoppen.
+	 */
 	public void disconnectAll() {
-		for( ProtocolHandler ph : connections ) {
+		Iterator<ProtocolHandler> it = connections.iterator();
+		while( it.hasNext() ) {
+			ProtocolHandler ph = it.next();
 			ph.close();
+			it.remove();
 		}
+//		for( ProtocolHandler ph : connections ) {
+//			ph.close();
+//		}
 	}
+
 
 	public void addListener( ServerListener listener ) {
 		dispatcher.addListener(listener);

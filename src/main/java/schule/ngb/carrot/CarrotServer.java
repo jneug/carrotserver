@@ -12,7 +12,6 @@ import java.awt.GraphicsEnvironment;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -234,12 +233,12 @@ public class CarrotServer {
 	private static final ServerListener serverLogger = new ServerListener() {
 		@Override
 		public void started( ServerEvent e ) {
-			LOG.info("Started service %s on port %d", e.server.getName(), e.server.getPort());
+			LOG.info("Started service %s on port %d", e.server.getProtocolName(), e.server.getPort());
 		}
 
 		@Override
 		public void stopped( ServerEvent e ) {
-			LOG.info("Stopped service %s on port %d", e.server.getName(), e.server.getPort());
+			LOG.info("Stopped service %s on port %d", e.server.getProtocolName(), e.server.getPort());
 		}
 
 		@Override

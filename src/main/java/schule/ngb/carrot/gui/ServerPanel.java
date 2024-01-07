@@ -62,7 +62,7 @@ public class ServerPanel extends JPanel implements ActionListener, ServerListene
 		this.setBorder(
 			BorderFactory.createTitledBorder(
 				BorderFactory.createBevelBorder(BevelBorder.RAISED),
-				server.getName()
+				server.getProtocolName()
 			)
 		);
 		this.setBackground(CarrotGUI.COLOR_CARROT_GREEN_LIGHT);
