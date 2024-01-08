@@ -34,7 +34,7 @@ geeignetem JAVA Runtime Environment (ab Java Version 11) ausgeführt werden.
 
 ## Konfiguration
 
-Eine vollständige Liste alle Konfigurationsoptionen finden sich im Wiki.
+Eine vollständige [Liste alle Konfigurationsoptionen](https://github.com/jneug/carrotserver/wiki/Konfiguration) finden sich im Wiki.
 
 ## Erweiterungen
 
@@ -42,4 +42,4 @@ Eine vollständige Liste alle Konfigurationsoptionen finden sich im Wiki.
 Erweiterungen können als java-Dateien im Daten-Ordner abgelegt werden und werden
 automatisch kompiliert und in die App integriert.
 
-Details zur Implemntierung eigener Protokoll finden sich im Wiki.
+Details zur [Implementierung eigener Protokoll](https://github.com/jneug/carrotserver/wiki/Erweiterungen-programmieren) finden sich im Wiki.
