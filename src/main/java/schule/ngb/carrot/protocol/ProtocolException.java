@@ -18,4 +18,12 @@ public class ProtocolException extends Exception {
 		return code;
 	}
 
+	public String toString() {
+		if( this.code != 0 ) {
+			return this.code + " " + this.getMessage();
+		} else {
+			return this.getMessage();
+		}
+	}
+
 }
