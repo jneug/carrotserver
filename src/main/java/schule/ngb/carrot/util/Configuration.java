@@ -2,6 +2,8 @@ package schule.ngb.carrot.util;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.ini4j.Ini;
+import schule.ngb.carrot.CarrotServer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,6 +46,20 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings( "unused" )
 public class Configuration implements Map<String, Object> {
+
+
+	public static void main( String[] args ) {
+		try( InputStream in = CarrotServer.class.getResourceAsStream("carrot.ini") ) {
+			Ini ini = new Ini(in);
+			int timeout = ini.get("carrot", "timeout", int.class);
+			int port = ini.get("pop3", "port", int.class);
+
+			System.out.println("timeout = " + timeout);
+			System.out.println("port = " + port);
+		} catch( IOException e ) {
+			System.err.println("Error reading ini file: " + e.getMessage());
+		}
+	}
 
 	/**
 	 * Trennzeichen für String-Felder, die serialisierte Arrays enthalten.
