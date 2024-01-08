@@ -251,13 +251,20 @@ public final class ProtocolLoader {
 			return true;
 		}
 
+		// Pfad der Protokoll-Erweiterungen
+		Path extPath = Paths.get(
+			config.getString("DATA"),
+			EXT_PATH,
+			EXT_PROTOCOLS_PATH
+		).toAbsolutePath();
+
 		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 		StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null);
 
 		List<String> optionList = new ArrayList<>();
 		optionList.add("-classpath");
-		optionList.add(System.getProperty("java.class.path"));
+		optionList.add(System.getProperty("java.class.path") + File.pathSeparator + extPath.toString());
 
 		Iterable<? extends JavaFileObject> compilationUnit = fileManager.getJavaFileObjects(javaFile);
 		JavaCompiler.CompilationTask task = compiler.getTask(
