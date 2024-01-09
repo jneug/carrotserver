@@ -1,5 +1,6 @@
 package schule.ngb.carrot.protocol;
 
+import org.ini4j.Ini;
 import schule.ngb.carrot.maildrop.FilesystemMaildrop;
 import schule.ngb.carrot.maildrop.Maildrop;
 import schule.ngb.carrot.maildrop.MaildropException;
@@ -13,7 +14,7 @@ public class POP3Factory extends GenericProtocolHandlerFactory {
 	private static final Log LOG = Log.getLogger(POP3Factory.class);
 
 
-	public POP3Factory( Configuration config ) {
+	public POP3Factory( Ini config ) {
 		super(config, POP3Handler.class);
 		restoreMails();
 	}
@@ -24,8 +25,8 @@ public class POP3Factory extends GenericProtocolHandlerFactory {
 	}
 
 	public void restoreMails() {
-		boolean restore = config.getBool("RESTORE_TRASH_ON_START", false);
-		for( String user : config.getConfig("USERS").keySet() ) {
+		boolean restore = config.get("pop3", "restore_trash_on_start", boolean.class);
+		for( String user : config.get("users").keySet() ) {
 			try {
 				Maildrop maildrop = new FilesystemMaildrop(user, config);
 				if( maildrop.isLocked() ) {

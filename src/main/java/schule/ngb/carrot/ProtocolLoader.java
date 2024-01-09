@@ -2,6 +2,8 @@ package schule.ngb.carrot;
 
 import dorkbox.annotation.AnnotationDefaults;
 import dorkbox.annotation.AnnotationDetector;
+import org.ini4j.Config;
+import org.ini4j.Ini;
 import schule.ngb.carrot.protocol.*;
 import schule.ngb.carrot.util.Configuration;
 import schule.ngb.carrot.util.Log;
@@ -53,7 +55,7 @@ public final class ProtocolLoader {
 	/**
 	 * Globale Konfiguration
 	 */
-	private final Configuration config;
+	private final Ini config;
 
 	/**
 	 * Menge der aktiven Protokolle, die in der Konfiguration definiert wurden.
@@ -69,11 +71,12 @@ public final class ProtocolLoader {
 	 *
 	 * @param config Globale konfiguration der App.
 	 */
-	public ProtocolLoader( Configuration config ) {
+	public ProtocolLoader( Ini config ) {
 		this.config = config;
 
 		// Menge der aktiven Protokolle vorbereiten (liegt als String-Array vor).
-		String[] configProtocols = config.getStringArray("PROTOCOLS");
+		// TODO change to new configuration system
+		String[] configProtocols = Configuration.toArray(config.get("carrot", "protocols"));
 		if( configProtocols != null ) {
 			activeProtocols = Arrays.stream(configProtocols).map(String::toUpperCase).collect(Collectors.toSet());
 			LOG.debug("Configured to load protocols %s", activeProtocols);
@@ -95,7 +98,7 @@ public final class ProtocolLoader {
 	public List<ProtocolHandlerFactory> loadExtensionProtocols() {
 		// Pfad der Protokoll-Erweiterungen
 		Path extPath = Paths.get(
-			config.getString("DATA"),
+			config.get("carrot", "data"),
 			EXT_PATH,
 			EXT_PROTOCOLS_PATH
 		).toAbsolutePath();
@@ -104,7 +107,7 @@ public final class ProtocolLoader {
 		List<ProtocolHandlerFactory> extensionList = new ArrayList<>();
 
 		if( Files.isDirectory(extPath) ) {
-			if( config.getBool("DYNAMIC_COMPILATION") ) {
+			if( config.get("carrot", "dynamic_compilation", boolean.class) ) {
 				// Falls dynamische Kompilierung aktiviert ist,
 				try( Stream<Path> fileList = Files.list(extPath) ) {
 					fileList
@@ -225,11 +228,11 @@ public final class ProtocolLoader {
 		// Instanz erstellen.
 		try {
 			if( factory.equals(GenericProtocolHandlerFactory.class) ) {
-				Constructor<?> constr = factory.getDeclaredConstructor(Configuration.class, Class.class);
+				Constructor<?> constr = factory.getDeclaredConstructor(Ini.class, Class.class);
 				Object phf = constr.newInstance(this.config, protocolClass);
 				return (ProtocolHandlerFactory) phf;
 			} else {
-				Constructor<?> constr = factory.getDeclaredConstructor(Configuration.class);
+				Constructor<?> constr = factory.getDeclaredConstructor(Ini.class);
 				Object phf = constr.newInstance(this.config);
 				return (ProtocolHandlerFactory) phf;
 			}
@@ -253,7 +256,7 @@ public final class ProtocolLoader {
 
 		// Pfad der Protokoll-Erweiterungen
 		Path extPath = Paths.get(
-			config.getString("DATA"),
+			config.get("carrot", "data"),
 			EXT_PATH,
 			EXT_PROTOCOLS_PATH
 		).toAbsolutePath();

@@ -1,5 +1,6 @@
 package schule.ngb.carrot.gui;
 
+import org.ini4j.Ini;
 import schule.ngb.carrot.Server;
 import schule.ngb.carrot.CarrotServer;
 import schule.ngb.carrot.util.Configuration;
@@ -44,9 +45,9 @@ public class CarrotGUI extends JFrame implements WindowListener, ActionListener,
 
 	private final CarrotServer app;
 
-	private final Configuration config;
+	private final Ini config;
 
-	public CarrotGUI( String title, CarrotServer app, Configuration config ) {
+	public CarrotGUI( String title, CarrotServer app, Ini config ) {
 		super(title);
 		this.app = app;
 		this.config = config;

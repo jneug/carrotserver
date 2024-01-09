@@ -1,5 +1,6 @@
 package schule.ngb.carrot.protocol;
 
+import org.ini4j.Ini;
 import schule.ngb.carrot.util.Configuration;
 import schule.ngb.carrot.util.Timer;
 
@@ -8,15 +9,15 @@ import java.net.Socket;
 
 public abstract class GenericProtocolHandler implements ProtocolHandler {
 
-	protected Configuration config;
+	protected final Ini config;
 
-	protected Socket socket;
+	protected final Socket socket;
 
 	protected boolean running = false;
 
 	private final Timer timer;
 
-	public GenericProtocolHandler( Socket clientSocket, Configuration config ) {
+	public GenericProtocolHandler( Socket clientSocket, Ini config ) {
 		this.socket = clientSocket;
 		this.config = config;
 
@@ -68,8 +69,6 @@ public abstract class GenericProtocolHandler implements ProtocolHandler {
 			try {
 				socket.close();
 			} catch( IOException ignored ) {
-			} finally {
-				socket = null;
 			}
 		}
 	}

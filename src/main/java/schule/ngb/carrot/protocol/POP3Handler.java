@@ -1,5 +1,6 @@
 package schule.ngb.carrot.protocol;
 
+import org.ini4j.Ini;
 import schule.ngb.carrot.CarrotServer;
 import schule.ngb.carrot.maildrop.FilesystemMaildrop;
 import schule.ngb.carrot.maildrop.Mail;
@@ -40,10 +41,10 @@ public class POP3Handler extends StringProtocolHandler {
 
 	private final String[] capabilities;
 
-	public POP3Handler( Socket clientSocket, Configuration config ) {
+	public POP3Handler( Socket clientSocket, Ini config ) {
 		super(clientSocket, config);
 
-		capabilities = config.getStringArray("CAPABILITIES");
+		capabilities = Configuration.toArray(config.get("pop3", "capabilities"));
 	}
 
 	public boolean hasCapability( String capa ) {
@@ -56,18 +57,18 @@ public class POP3Handler extends StringProtocolHandler {
 	}
 
 	public boolean hasUser( String name ) {
-		return config.getConfig("USERS").getString(name) != null;
+		return config.get("users", name) != null;
 	}
 
 	public String getPassword( String name ) {
-		return config.getConfig("USERS").getString(name);
+		return config.get("users", name);
 	}
 
 	private String getMessageId() {
 		return String.format(
 			"<%d@%s>",
 			this.timestamp,
-			this.config.getString("HOST", "carrot.local")
+			this.config.get("host")
 		);
 	}
 
@@ -95,7 +96,7 @@ public class POP3Handler extends StringProtocolHandler {
 		// Timestamp for APOP authentication
 		this.timestamp = System.currentTimeMillis();
 
-		if( config.getBool("ENABLE_APOP", false) && canHash() ) {
+		if( config.get("pop3", "enable_apop", boolean.class) && canHash() ) {
 			sendOk("Welcome to %s (v%s) %s", CarrotServer.APP_NAME, CarrotServer.APP_VERSION, getMessageId());
 		} else {
 			sendOk("Welcome to %s (v%s)", CarrotServer.APP_NAME, CarrotServer.APP_VERSION);
@@ -393,7 +394,7 @@ public class POP3Handler extends StringProtocolHandler {
 			if( value.isEmpty() ) {
 				sendOk();
 				for( Mail mail : maildrop.listMails() ) {
-					if( config.getBool("UIDL_HASH") ) {
+					if( config.get("pop3", "uidl_hash", boolean.class) ) {
 						send("%d %s", mail.getNumber(), mail.getHash());
 					} else {
 						send("%d %s", mail.getNumber(), mail.getId());

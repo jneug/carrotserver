@@ -1,5 +1,6 @@
 package schule.ngb.carrot.protocol;
 
+import org.ini4j.Ini;
 import schule.ngb.carrot.util.Configuration;
 
 import java.net.Socket;
@@ -15,7 +16,7 @@ public abstract class CommandProtocolHandler extends StringProtocolHandler {
 
 	protected String message = null;
 
-	public CommandProtocolHandler( Socket clientSocket, Configuration config ) {
+	public CommandProtocolHandler( Socket clientSocket, Ini config ) {
 		super(clientSocket, config);
 	}
 

@@ -1,6 +1,8 @@
 package schule.ngb.carrot;
 
 import org.apache.commons.cli.*;
+import org.ini4j.Ini;
+import org.ini4j.Profile;
 import schule.ngb.carrot.events.ServerEvent;
 import schule.ngb.carrot.events.ServerListener;
 import schule.ngb.carrot.gui.CarrotGUI;
@@ -9,11 +11,12 @@ import schule.ngb.carrot.util.Configuration;
 import schule.ngb.carrot.util.Log;
 
 import java.awt.GraphicsEnvironment;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Hauptklasse von <strong>CarrotServ</strong>.
@@ -23,67 +26,48 @@ import java.util.List;
  */
 public class CarrotServer {
 
-
 	/**
 	 * Eintrittspunkt der App.
 	 *
 	 * @param args Kommandozielenargumente
-	 * @todo Argumente implementieren für einen headless-start.
 	 */
 	public static void main( String[] args ) {
-		// Prepare options parsing (using apache commons-cli)
-		Options options = new Options();
-		options.addOption("c", "config", true, "define a path or name of a config file to use");
-		options.addOption("h", "host", true, "set the hostname");
-		options.addOption("d", "data", true, "set the data storage folder");
-		options.addOption(Option.builder("HEADLESS").longOpt("headless").desc("start without gui").build());
-		options.addOption(Option.builder("DEBUG").longOpt("debug").desc("show debugging information").build());
-
-		CommandLine cli = null;
-		try {
-			CommandLineParser parser = new DefaultParser();
-			cli = parser.parse(options, args);
-		} catch( ParseException ignored ) {
-			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp("java -jar " + APP_NAME + ".jar", options);
-			System.exit(1);
-		}
+		// Kommandozeile parsen
+		CommandLine cli = Configuration.parseCli(args);
 
 		// Kommandozeile auf spezifische Config-Datei prüfen
-		Path configFile = null;
+		Path configFile = Paths.get(System.getProperty("user.dir"), CONFIG_FILE);
 		if( cli != null && cli.hasOption("config") ) {
 			configFile = Paths.get(cli.getOptionValue("config"));
 			if( !configFile.isAbsolute() ) {
 				configFile = Paths.get(System.getProperty("user.dir")).resolve(configFile);
 			}
-		} else {
-			configFile = Paths.get(System.getProperty("user.dir"), CONFIG_FILE);
 		}
 
-		// Die Hauptkonfiguration muss vorab geladen werden,
-		// um die DEBUG-Einstellung abzurufen.
-		Configuration config = Configuration
-			.from(CarrotServer.class.getResourceAsStream(CONFIG_FILE))
+		// App-Konfiguration aufbauen, beginnend mit der Default-Konfiguration
+		Ini config;
+		config = Configuration.from()
+			.load(CarrotServer.class.getResourceAsStream(CONFIG_FILE))
 			.load(configFile)
-			.load(cli)
-			.get();
-
-		// Bis hier könnte sich der DATA_PATH geändert haben.
-		// Dort noch nach einer Konfiguration schauen.
+			.build();
 		config = Configuration.from(config)
-			.load(Paths.get(config.getString("DATA", DATA_PATH), CONFIG_FILE))
-			.get();
-
+			.load(Paths.get(config.get("carrot", "data"), CONFIG_FILE))
+			.load(cli)
+			.build();
+		// App information for dynamic replacements
+		Profile.Section appSection = config.get("carrot").addChild("app");
+		appSection.put("name", CarrotServer.APP_NAME);
+		appSection.put("version", CarrotServer.APP_VERSION);
 
 		// DEBUG-Modus einschalten.
-		if( config.getBool("DEBUG", false) ) {
+		if( config.get("carrot", "debug", boolean.class) ) {
 			Log.enableGlobalDebugging();
 		}
 
 		// Start der App
 		CarrotServer app = new CarrotServer(config);
 		app.start();
-		if( !GraphicsEnvironment.isHeadless() && !config.getBool("HEADLESS") ) {
+		if( !GraphicsEnvironment.isHeadless() && !config.get("carrot", "headless", boolean.class) ) {
 			app.createGUI();
 		}
 	}
@@ -120,7 +104,7 @@ public class CarrotServer {
 	/**
 	 * Globale Konfiguration der App.
 	 */
-	private final Configuration config;
+	private final Ini config;
 
 	/**
 	 * Liste der verfügbaren Dienste (Protokolle) bei diesem Start der App.
@@ -132,24 +116,19 @@ public class CarrotServer {
 	 *
 	 * @param globalConfig Die globale Konfiguration, mit der diese App-Instanz läuft.
 	 */
-	public CarrotServer( Configuration globalConfig ) {
+	public CarrotServer( Ini globalConfig ) {
 		this.config = globalConfig;
 
-		// Auth-DAten laden und der Konfiguration hinzufügen.
-		Path authPath = Paths.get(config.getString("DATA", DATA_PATH), AUTH_FILE);
-		Configuration authConfig = Configuration.from(authPath).get();
-		config.set("USERS", authConfig);
-
 		// Debugging-Ausgabe
-		if( !authConfig.isEmpty() ) {
-			LOG.debug("Authentication data loaded from %s.", authPath);
-			LOG.debug("Possible logins:");
-			for( String username : config.getConfig("USERS").keys() ) {
-				LOG.debug("    %s", username);
-			}
-		} else {
-			LOG.warn("No %s file found in the data dir. You won't be able to log in.", AUTH_FILE);
-		}
+//		if( !authConfig.isEmpty() ) {
+//			LOG.debug("Authentication data loaded from %s.", authPath);
+//			LOG.debug("Possible logins:");
+//			for( String username : config.getConfig("USERS").keys() ) {
+//				LOG.debug("    %s", username);
+//			}
+//		} else {
+//			LOG.warn("No %s file found in the data dir. You won't be able to log in.", AUTH_FILE);
+//		}
 	}
 
 	/**
@@ -191,8 +170,8 @@ public class CarrotServer {
 		this.services = new ArrayList<>();
 		for( ProtocolHandlerFactory phf : protocols ) {
 			Server s = new Server(phf.getPort(), phf);
-			if( config.getInt("TIMEOUT") > 0 ) {
-				s.setConnectionTimeout(config.getInt("TIMEOUT"));
+			if( config.get("carrot", "timeout", int.class) > 0 ) {
+				s.setConnectionTimeout(config.get("carrot", "timeout", int.class));
 			}
 			services.add(s);
 			s.start();
@@ -215,7 +194,7 @@ public class CarrotServer {
 	 *
 	 * @return Die globale Konfiguration.
 	 */
-	public Configuration getConfig() {
+	public Ini getConfig() {
 		return config;
 	}
 

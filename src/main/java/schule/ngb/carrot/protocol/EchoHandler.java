@@ -1,6 +1,6 @@
 package schule.ngb.carrot.protocol;
 
-import schule.ngb.carrot.util.Configuration;
+import org.ini4j.Ini;
 import schule.ngb.carrot.util.Log;
 
 import java.net.Socket;
@@ -23,10 +23,10 @@ public class EchoHandler extends StringProtocolHandler {
 	 * @param clientSocket
 	 * @param config
 	 */
-	public EchoHandler( Socket clientSocket, Configuration config ) {
+	public EchoHandler( Socket clientSocket, Ini config ) {
 		super(clientSocket, config);
 
-		messageFormat = config.getString("MESSAGE_FORMAT");
+		messageFormat = config.get("echo", "message_format");
 	}
 
 	@Override

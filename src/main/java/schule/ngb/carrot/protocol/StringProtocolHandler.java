@@ -1,5 +1,6 @@
 package schule.ngb.carrot.protocol;
 
+import org.ini4j.Ini;
 import schule.ngb.carrot.util.Configuration;
 import schule.ngb.carrot.util.Log;
 
@@ -29,7 +30,7 @@ public abstract class StringProtocolHandler extends GenericProtocolHandler {
 
 	private boolean autoResetTimer = true;
 
-	public StringProtocolHandler( Socket clientSocket, Configuration config ) {
+	public StringProtocolHandler( Socket clientSocket, Ini config ) {
 		super(clientSocket, config);
 
 		try {

@@ -1,5 +1,6 @@
 package schule.ngb.carrot.protocol;
 
+import org.ini4j.Ini;
 import schule.ngb.carrot.CarrotServer;
 import schule.ngb.carrot.protocol.SMTPFactory.TransmissionQueue;
 import schule.ngb.carrot.maildrop.MailAddress;
@@ -74,7 +75,7 @@ public class SMTPHandler extends StringProtocolHandler {
 
 	private TransmissionQueue transmissionQueue;
 
-	public SMTPHandler( Socket clientSocket, Configuration config, TransmissionQueue transmissionQueue ) {
+	public SMTPHandler( Socket clientSocket, Ini config, TransmissionQueue transmissionQueue ) {
 		super(clientSocket, config);
 		this.transmissionQueue = transmissionQueue;
 	}
@@ -84,7 +85,7 @@ public class SMTPHandler extends StringProtocolHandler {
 			String hostname = mail.getHostname();
 			return hostname.equals("[127.0.0.1]")
 				|| hostname.equals(String.format("[%s]", socket.getLocalAddress().getHostAddress()))
-				|| hostname.equalsIgnoreCase(config.getString("HOST"));
+				|| hostname.equalsIgnoreCase(config.get("carrot", "host"));
 		} else {
 			return false;
 		}
@@ -93,7 +94,7 @@ public class SMTPHandler extends StringProtocolHandler {
 	@Override
 	public void handleConnect() {
 		send(STATUS_READY, "%s SMTP ready on %s (v%s)",
-			config.getString("HOST"),
+			config.get("host"),
 			CarrotServer.APP_NAME, CarrotServer.APP_VERSION
 		);
 		LOG.info("SMTP client connected from %s", socket.getInetAddress());
@@ -202,12 +203,12 @@ public class SMTPHandler extends StringProtocolHandler {
 
 	private void handleHelo( String value ) throws ProtocolException {
 		hostname = value;
-		send(STATUS_OK, config.getString("HOST"));
+		send(STATUS_OK, config.get("carrot", "host"));
 	}
 
 	private void handleEhlo( String value ) throws ProtocolException {
 		hostname = value;
-		sendInline(STATUS_OK, config.getString("HOST"));
+		sendInline(STATUS_OK, config.get("carrot", "host"));
 		send(STATUS_OK, "AUTH PLAIN DIGEST-MD5");
 	}
 
@@ -255,9 +256,9 @@ public class SMTPHandler extends StringProtocolHandler {
 		}
 
 		MailAddress rcptAddr = MailAddress.parseString(value.substring(3));
-		if( config.getBool("ACCEPT_ANY_RCPT")
+		if( config.get("smtp", "accept_any_rcpt", boolean.class)
 			|| (isLocalMailPath(rcptAddr)
-				&& config.getConfig("USERS").containsKey(rcptAddr.getMailbox())) ) {
+				&& config.get("users", rcptAddr.getMailbox()) != null) ) {
 			recipients.add(rcptAddr);
 			send(STATUS_OK, "OK");
 		} else {

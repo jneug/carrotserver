@@ -1,5 +1,7 @@
 package schule.ngb.carrot.protocol;
 
+import org.ini4j.Ini;
+import org.ini4j.Profile;
 import schule.ngb.carrot.maildrop.FilesystemMaildrop;
 import schule.ngb.carrot.maildrop.MailAddress;
 import schule.ngb.carrot.maildrop.Maildrop;
@@ -46,7 +48,7 @@ public class SMTPFactory extends GenericProtocolHandlerFactory {
 				@Override
 				public void run() {
 					// Add random delay to simulate slow network
-					int delay = config.getInt("RANDOM_SEND_DELAY");
+					int delay = config.get("smtp", "random_send_delay", int.class);
 					if( delay > 0 ) {
 						try {
 							Thread.sleep(new Random().nextInt(delay));
@@ -54,7 +56,7 @@ public class SMTPFactory extends GenericProtocolHandlerFactory {
 						}
 					}
 
-					Configuration users = config.getConfig("USERS");
+					Profile.Section users = config.get("users");
 					for( MailAddress addr : recipients ) {
 						if( isLocalAddress(addr) && users.containsKey(addr.getMailbox()) ) {
 							try {
@@ -64,13 +66,13 @@ public class SMTPFactory extends GenericProtocolHandlerFactory {
 							} catch( MaildropException e ) {
 								LOG.error(e, "Failed to open mailbox for user %s", from.getMailbox());
 							}
-						} else if( config.getBool("CREATE_ERROR_MAILS") && isLocalAddress(from) && users.containsKey(from.getMailbox()) ) {
+						} else if( config.get("smtp", "create_error_mails", boolean.class) && isLocalAddress(from) && users.containsKey(from.getMailbox()) ) {
 							try {
 								Maildrop maildrop = new FilesystemMaildrop(from.getMailbox(), config);
 								maildrop.createMail(
 									String.format(getFailureNotice(),
 										"4Sc6Cj3Nvxz9sT7.1700811207",
-										config.getString("HOST"),
+										config.get("host"),
 										new Date(),
 										from,
 										addr,
@@ -110,7 +112,7 @@ public class SMTPFactory extends GenericProtocolHandlerFactory {
 			if( mail != null ) {
 				String hostname = mail.getHostname();
 				return hostname.equals("[127.0.0.1]")
-					|| hostname.equalsIgnoreCase(config.getString("HOST"));
+					|| hostname.equalsIgnoreCase(config.get("carrot", "host"));
 			} else {
 				return false;
 			}
@@ -122,7 +124,7 @@ public class SMTPFactory extends GenericProtocolHandlerFactory {
 	private TransmissionQueue transmissionQueue;
 
 
-	public SMTPFactory( Configuration config ) {
+	public SMTPFactory( Ini config ) {
 		super(config, SMTPHandler.class);
 		transmissionQueue = new TransmissionQueue();
 	}

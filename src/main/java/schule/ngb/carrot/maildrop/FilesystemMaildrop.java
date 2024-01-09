@@ -1,5 +1,9 @@
 package schule.ngb.carrot.maildrop;
 
+import static schule.ngb.carrot.util.Configuration.SECTION_MAIN;
+import static schule.ngb.carrot.util.Configuration.SECTION_USERS;
+
+import org.ini4j.Ini;
 import schule.ngb.carrot.util.Configuration;
 import schule.ngb.carrot.util.Log;
 
@@ -18,9 +22,9 @@ public class FilesystemMaildrop implements Maildrop {
 
 	public static final class Factory implements MaildropFactory {
 
-		private final Configuration config;
+		private final Ini config;
 
-		public Factory( Configuration config ) {
+		public Factory( Ini config ) {
 			this.config = config;
 		}
 
@@ -38,18 +42,19 @@ public class FilesystemMaildrop implements Maildrop {
 	private static final Log LOG = Log.getLogger(FilesystemMaildrop.class);
 
 
-	private Configuration config;
+	private final Ini config;
 
-	private Path root;
+	private final Path root;
 
-	private HashMap<Path, Mail> mails;
+	private final HashMap<Path, Mail> mails;
 
-	public FilesystemMaildrop( String username, Configuration config ) throws MaildropException {
+	public FilesystemMaildrop( String username, Ini config ) throws MaildropException {
 		this.config = config;
 
-		root = Paths.get(
-			this.config.getString("DATA"),
-			this.config.getString("MAILDROP", "maildrop"),
+		// TODO xxx
+		root= Paths.get(
+			this.config.get(SECTION_MAIN, "data"),
+			this.config.get("pop3", "maildrop"),
 			username
 		);
 		if( !Files.exists(root) ) {
@@ -234,7 +239,8 @@ public class FilesystemMaildrop implements Maildrop {
 	}
 
 	public Path getTrash() {
-		return root.resolveSibling(config.getString("TRASH", "_trash")).resolve(root.getFileName());
+		// TODO xxx
+		return root.resolveSibling(config.get("pop3", "trash")).resolve(root.getFileName());
 	}
 
 	public Path getLock() {

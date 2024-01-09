@@ -1,8 +1,11 @@
 package schule.ngb.carrot.protocol;
 
+import org.ini4j.Ini;
 import schule.ngb.carrot.util.Configuration;
 import schule.ngb.carrot.util.Log;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.nio.file.Paths;
@@ -31,26 +34,25 @@ public class GenericProtocolHandlerFactory implements ProtocolHandlerFactory {
 	/**
 	 * Konfiguration des Protokolls.
 	 */
-	protected final Configuration config;
+	protected final Ini config;
 
 	/**
 	 * Klasse des
 	 */
 	protected final Class<? extends ProtocolHandler> type;
 
-	public GenericProtocolHandlerFactory( Configuration globalConfig, Class<? extends ProtocolHandler> type ) {
+	public GenericProtocolHandlerFactory( Ini globalConfig, Class<? extends ProtocolHandler> type ) {
 		this.type = type;
 
 		processAnnotation();
 
-		this.config = Configuration
-			.from(globalConfig)
+		this.config = Configuration.from(globalConfig)
 			.load(type.getResourceAsStream(this.configFile))
-			.load(Paths.get(globalConfig.getString("DATA"), this.configFile))
-			.get();
+			.build();
+
 		// Look for custom port in configuration
-		if( this.config.containsKey("PORT") ) {
-			this.port = this.config.getInt("PORT");
+		if( this.config.get(this.name, "port") != null ) {
+			this.port = this.config.get(this.name, "port", int.class);
 		}
 	}
 
@@ -79,14 +81,14 @@ public class GenericProtocolHandlerFactory implements ProtocolHandlerFactory {
 		return this.port;
 	}
 
-	public Configuration getConfig() {
+	public Ini getConfig() {
 		return config;
 	}
 
 	@Override
 	public ProtocolHandler create( Socket clientSocket ) {
 		try {
-			return type.getDeclaredConstructor(Socket.class, Configuration.class).newInstance(
+			return type.getDeclaredConstructor(Socket.class, Ini.class).newInstance(
 				clientSocket, this.config
 			);
 		} catch( InstantiationException | IllegalAccessException | InvocationTargetException |
