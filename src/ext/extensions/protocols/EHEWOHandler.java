@@ -1,13 +1,13 @@
-import java.net.Socket;
-
+import org.ini4j.Ini;
 import schule.ngb.carrot.protocol.Protocol;
 import schule.ngb.carrot.protocol.StringProtocolHandler;
-import schule.ngb.carrot.util.Configuration;
+
+import java.net.Socket;
 
 @Protocol( name = "ehewo", port = 4445 )
 public class EHEWOHandler extends StringProtocolHandler {
 
-	public EHEWOHandler( Socket clientSocket, Configuration config ) {
+	public EHEWOHandler( Socket clientSocket, Ini config ) {
 		super(clientSocket, config);
 	}
 
@@ -20,7 +20,7 @@ public class EHEWOHandler extends StringProtocolHandler {
 		if( message.equalsIgnoreCase("QUIT") ) {
 			close();
 		} else {
-			send(config.getString("REPLY"));
+			send(config.get("ehewo", "reply"));
 		}
 	}
 

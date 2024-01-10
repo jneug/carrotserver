@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="CarrotServer.main:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/CarrotServer_main_jar</output-path>
+    <root id="archive" name="CarrotServer.main.jar">
+      <element id="module-output" name="CarrotServer.main" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/commons-cli/commons-cli/1.6.0/38166a23afb5bd5520f739b87b3be87f7f0fb96d/commons-cli-1.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.ini4j/ini4j/0.5.4/4a3ee4146a90c619b20977d65951825f5675b560/ini4j-0.5.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.dorkbox/Annotations/3.1/3071f44e2b47123d3ad41c67d21c8cd201ec70d/Annotations-3.1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

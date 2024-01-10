@@ -101,15 +101,10 @@ public class POP3Handler extends StringProtocolHandler {
 		} else {
 			sendOk("Welcome to %s (v%s)", CarrotServer.APP_NAME, CarrotServer.APP_VERSION);
 		}
-		LOG.info("POP3 client connected from %s", socket.getInetAddress());
 	}
 
 	@Override
 	public void handleDisconnect() {
-		if( socket != null && socket.isConnected() ) {
-			LOG.info("POP3 client disconnected from %s", socket.getInetAddress());
-		}
-
 		try {
 			if( maildrop != null ) {
 				maildrop.unlock();

@@ -2,9 +2,9 @@ package schule.ngb.carrot.events;
 
 public interface ServerListener extends Listener<ServerEvent> {
 
-	void started( ServerEvent e );
+	void serverStarted( ServerEvent e );
 
-	void stopped( ServerEvent e );
+	void serverStopped( ServerEvent e );
 
 	void clientConnected( ServerEvent e );
 

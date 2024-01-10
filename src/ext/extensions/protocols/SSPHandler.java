@@ -1,3 +1,4 @@
+import org.ini4j.Ini;
 import schule.ngb.carrot.protocol.CommandProtocolHandler;
 import schule.ngb.carrot.protocol.Protocol;
 import schule.ngb.carrot.protocol.ProtocolException;
@@ -36,14 +37,14 @@ public class SSPHandler extends CommandProtocolHandler {
 
 	private final Random rand;
 
-	public SSPHandler( Socket clientSocket, Configuration config ) {
+	public SSPHandler( Socket clientSocket, Ini config ) {
 		super(clientSocket, config);
 
 		rand = new Random();
 
-		stone = config.getStringArray("SYMBOL_STONE");
-		scissors = config.getStringArray("SYMBOL_SCISSORS");
-		paper = config.getStringArray("SYMBOL_PAPER");
+		stone = Configuration.toArray(config.get("ssp", "symbol_stone"));
+		scissors = Configuration.toArray(config.get("ssp", "symbol_scissors"));
+		paper = Configuration.toArray(config.get("ssp", "symbol_paper"));
 	}
 
 	private int getSymbolFor( String value ) {
@@ -80,8 +81,7 @@ public class SSPHandler extends CommandProtocolHandler {
 
 	@Override
 	public void handleConnect() {
-		sendOk(config.getString("GREETING", "Welcome"));
-		LOG.info("New client connected from %s", socket.getInetAddress());
+		sendOk(config.fetch("ssp", "greeting"));
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class SSPHandler extends CommandProtocolHandler {
 	private void handlePlay( String value ) throws ProtocolException {
 		try {
 			if( value.isEmpty() ) {
-				roundsTotal = config.getInt("DEFAULT_ROUNDS", 3);
+				roundsTotal = config.get("ssp", "default_rounds", int.class);
 			} else {
 				roundsTotal = Integer.parseInt(value);
 				if( roundsTotal % 2 == 0 ) {
@@ -115,7 +115,7 @@ public class SSPHandler extends CommandProtocolHandler {
 			roundsCurrent = 0;
 			state = STATE_PLAY;
 
-			sendOk("Starting game with %d rounds", roundsTotal);
+			sendOk("starting game with %d rounds", roundsTotal);
 		} catch( NumberFormatException e ) {
 			throw new ProtocolException("illegal argument, number expected");
 		}
@@ -178,7 +178,6 @@ public class SSPHandler extends CommandProtocolHandler {
 
 	@Override
 	public void handleDisconnect() {
-		LOG.info("Client disconnected from %s", socket.getInetAddress());
 	}
 
 	private void sendOk() {

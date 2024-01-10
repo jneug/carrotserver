@@ -97,7 +97,6 @@ public class SMTPHandler extends StringProtocolHandler {
 			config.get("host"),
 			CarrotServer.APP_NAME, CarrotServer.APP_VERSION
 		);
-		LOG.info("SMTP client connected from %s", socket.getInetAddress());
 	}
 
 	@Override
@@ -106,7 +105,6 @@ public class SMTPHandler extends StringProtocolHandler {
 			if( state != STATE_QUIT ) {
 				send(STATUS_DISCONNECT, "connection interrupted, closing down");
 			}
-			LOG.info("SMTP client disconnected from %s", socket.getInetAddress());
 		}
 	}
 

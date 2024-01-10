@@ -2,6 +2,8 @@ package schule.ngb.carrot.protocol;
 
 import schule.ngb.carrot.util.Timer;
 
+import java.net.Socket;
+
 public interface ProtocolHandler extends Runnable {
 
 	boolean isRunning();
@@ -13,5 +15,7 @@ public interface ProtocolHandler extends Runnable {
 	void stop();
 
 	void close();
+
+	Socket getSocket();
 
 }

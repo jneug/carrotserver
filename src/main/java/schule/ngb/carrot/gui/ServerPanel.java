@@ -168,7 +168,7 @@ public class ServerPanel extends JPanel implements ActionListener, ServerListene
 	}
 
 	@Override
-	public void started( ServerEvent e ) {
+	public void serverStarted( ServerEvent e ) {
 		this.setStatusRunning();
 
 		this.connections = 0;
@@ -176,7 +176,7 @@ public class ServerPanel extends JPanel implements ActionListener, ServerListene
 	}
 
 	@Override
-	public void stopped( ServerEvent e ) {
+	public void serverStopped( ServerEvent e ) {
 		this.setStatusStopped();
 
 		this.connections = 0;

@@ -30,7 +30,7 @@ import java.util.stream.Stream;
  * Dazu werden die nativen Protokolle aus {@link schule.ngb.carrot.protocol} geladen, sowie
  * mögliche Erweiterungen, die im {@code DATA_PATH} abgelegt wurden.
  * <p>
- * Erweiterungen können vorkompilierte {@link .class} Dateien sein, oder {@code .java} Dateien, die
+ * Erweiterungen können vorkompilierte {@code .class} Dateien sein, oder {@code .java} Dateien, die
  * dynamisch bei Programmstart kompiliert werden. Eine Protokoll-Erweiterung muss das
  * {@link ProtocolHandler} Interface implementieren und mit der {@link Protocol} Annotation versehen
  * sein.

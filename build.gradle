@@ -1,10 +1,12 @@
 plugins {
     id 'java'
 	id 'application'
+//	id("nl.colorize.gradle.macapplicationbundle") version "2021.4"
+	id 'edu.sc.seis.launch4j' version '3.0.5'
 }
 
 group = 'schule.ngb'
-version = '1.0-SNAPSHOT'
+version = "${version}"
 
 repositories {
     mavenCentral()
@@ -19,18 +21,46 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
-application {
-	mainClass = 'schule.ngb.carrot.CarrotServer'
+java {
+	withSourcesJar()
+	withJavadocJar()
 }
+
+compileJava {
+	options.release = 11
+}
+
+javadoc {
+	failOnError = false
+
+	options {
+		encoding = "UTF-8"
+		// overview = "src/resources/java/overview.html"
+		// title = "Die Zeichenmaschine"
+
+		links 'https://docs.oracle.com/en/java/javase/11/docs/api'
+	}
+	options.addStringOption("charset", "UTF-8")
+}
+
 
 jar {
 	manifest {
-		attributes 'Main-Class': application.mainClass
+		attributes 'Main-Class': "${mainClass}"
 	}
 	from {
 		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
 	}
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+application {
+	mainClass = "${mainClass}"
+}
+
+launch4j {
+	mainClassName = "${mainClass}"
+	icon = "${projectDir}/assets/Logo.ico"
 }
 
 test {

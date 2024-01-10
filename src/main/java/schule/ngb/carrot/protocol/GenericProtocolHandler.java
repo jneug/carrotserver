@@ -31,7 +31,7 @@ public abstract class GenericProtocolHandler implements ProtocolHandler {
 
 	@Override
 	public boolean isClosed() {
-		return this.socket == null || !this.socket.isConnected();
+		return this.socket.isClosed() || !this.socket.isConnected();
 	}
 
 	@Override
@@ -45,6 +45,11 @@ public abstract class GenericProtocolHandler implements ProtocolHandler {
 
 	protected void startTimer() {
 		timer.start();
+	}
+
+	@Override
+	public Socket getSocket() {
+		return socket;
 	}
 
 	@Override

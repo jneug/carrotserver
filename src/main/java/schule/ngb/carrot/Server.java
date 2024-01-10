@@ -113,8 +113,8 @@ public class Server implements Runnable {
 
 		// Events vorbereiten
 		this.dispatcher = new EventDispatcher<>();
-		this.dispatcher.registerEventType("started", ( e, l ) -> l.started(e));
-		this.dispatcher.registerEventType("stopped", ( e, l ) -> l.stopped(e));
+		this.dispatcher.registerEventType("started", ( e, l ) -> l.serverStarted(e));
+		this.dispatcher.registerEventType("stopped", ( e, l ) -> l.serverStopped(e));
 		this.dispatcher.registerEventType("connected", ( e, l ) -> l.clientConnected(e));
 		this.dispatcher.registerEventType("disconnected", ( e, l ) -> l.clientDisconnected(e));
 		this.dispatcher.registerEventType("timeout", ( e, l ) -> l.clientTimeout(e));
@@ -143,7 +143,7 @@ public class Server implements Runnable {
 	}
 
 	/**
-	 * Liefert den Namen des Protokolle, das auf diesem Server läuft.
+	 * Liefert den Namen des Protokolls, das auf diesem Server läuft.
 	 *
 	 * @return
 	 */
@@ -291,6 +291,7 @@ public class Server implements Runnable {
 			ProtocolHandler ph = it.next();
 			ph.close();
 			it.remove();
+			dispatch("disconnected", ph);
 		}
 //		for( ProtocolHandler ph : connections ) {
 //			ph.close();

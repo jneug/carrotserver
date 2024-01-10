@@ -147,13 +147,15 @@ public class Configuration {
 		}
 
 		public ConfigBuilder load( InputStream source ) {
-			try {
-				if( this.ini == null ) {
-					init().load(source);
-				} else {
-					this.ini = merge(this.ini, newIni(source));
+			if( source != null ) {
+				try {
+					if( this.ini == null ) {
+						init().load(source);
+					} else {
+						this.ini = merge(this.ini, newIni(source));
+					}
+				} catch( IOException ignored ) {
 				}
-			} catch( IOException ignored ) {
 			}
 			return this;
 		}

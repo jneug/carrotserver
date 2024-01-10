@@ -11,21 +11,18 @@ import java.util.function.BiConsumer;
  * <a href="https://org.coloradomesa.edu/~wmacevoy/listen/paper.html">Skilled
  * Listening in Java</a> von Dr. Warren D. MacEvoy.
  * <p>
- * Der {@code EventDispatcher} verwaltet eine Liste von angemeldeten Listenern
- * in einem {@link CopyOnWriteArraySet}, dass besonders für Situationen geeignet
- * ist, in denen in der Regel wenige Objekte verwaltet werden müssen, auf die
- * schnell zugegriffen werden soll und die sich selten ändern. Das trifft in den
- * meisten Fällen auf die Listener eines Objekts zu.
+ * Der {@code EventDispatcher} verwaltet eine Liste von angemeldeten Listenern in einem
+ * {@link CopyOnWriteArraySet}, dass besonders für Situationen geeignet ist, in denen in der Regel
+ * wenige Objekte verwaltet werden müssen, auf die schnell zugegriffen werden soll und die sich
+ * selten ändern. Das trifft in den meisten Fällen auf die Listener eines Objekts zu.
  * <p>
- * Um einen {@code EventDispatcher} zu nutzen, muss eine Schnittstelle als
- * Unterinterface von {@link Listener} erstellt werden, die Methoden für die
- * einzelnen Events definiert. In der Regel wird eine Methode pro Event
- * angelegt, aber dies ist nicht unbedingt notwendig.
+ * Um einen {@code EventDispatcher} zu nutzen, muss eine Schnittstelle als Unterinterface von
+ * {@link Listener} erstellt werden, die Methoden für die einzelnen Events definiert. In der Regel
+ * wird eine Methode pro Event angelegt, aber dies ist nicht unbedingt notwendig.
  * <p>
  * Ein Objekt, dass Events für diese Art von Listener erzeugt, erstellt einen
- * {@code EventDispatcher} und
- * {@link #registerEventType(String, BiConsumer) registriert} die notwendigen
- * Events.
+ * {@code EventDispatcher} und {@link #registerEventType(String, BiConsumer) registriert} die
+ * notwendigen Events.
  *
  * <pre><code>
  * EventDispatcher&lt;MyEvent, MyEventListener&gt; dispatcher = new EventDispatcher&lt;&gt;();
@@ -33,11 +30,11 @@ import java.util.function.BiConsumer;
  * dispatcher.registerEventType("stop", (evt, listener) -> listener.stopped(evt));
  * </code></pre>
  * <p>
- * Hier werden zwei Events registriert "start" und "stop". Die Bezeichnung der
- * Events wird nut intern verwendet. Jedes Event registriert eine Funktion, die
- * den Aufruf der Listener-Schnittstelle umsetzt. In der Regel ist dies ein
- * Lambda-Ausdruck von zwei Parametern: dem Event-Objekt vom Typ {@code E} und
- * der Listener, der aufgerufen werden soll, vom Typ {@code L}.
+ * Hier werden zwei Events registriert "start" und "stop". Die Bezeichnung der Events wird nut
+ * intern verwendet. Jedes Event registriert eine Funktion, die den Aufruf der
+ * Listener-Schnittstelle umsetzt. In der Regel ist dies ein Lambda-Ausdruck von zwei Parametern:
+ * dem Event-Objekt vom Typ {@code E} und der Listener, der aufgerufen werden soll, vom Typ
+ * {@code L}.
  * <p>
  * Nun können {@code MyEventListener} angemeldet und Events ausgelöst werden.
  *
@@ -56,7 +53,6 @@ import java.util.function.BiConsumer;
  *     dispatcher.dispatchEvent("stop", new MyEvent());
  * }
  * </code></pre>
- * <p>
  *
  * @param <E> Typ der Event-Objekte.
  * @param <L> Typ der verwendeten Listener-Schnittstelle.

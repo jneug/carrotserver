@@ -1,6 +1,6 @@
 package schule.ngb.carrot;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
 import org.ini4j.Ini;
 import org.ini4j.Profile;
 import schule.ngb.carrot.events.ServerEvent;
@@ -11,12 +11,13 @@ import schule.ngb.carrot.util.Configuration;
 import schule.ngb.carrot.util.Log;
 
 import java.awt.GraphicsEnvironment;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Hauptklasse von <strong>CarrotServ</strong>.
@@ -51,23 +52,23 @@ public class CarrotServer {
 			.load(configFile)
 			.build();
 		config = Configuration.from(config)
-			.load(Paths.get(config.get("carrot", "data"), CONFIG_FILE))
+			.load(Paths.get(config.get(Configuration.SECTION_MAIN, "data"), CONFIG_FILE))
 			.load(cli)
 			.build();
 		// App information for dynamic replacements
-		Profile.Section appSection = config.get("carrot").addChild("app");
+		Profile.Section appSection = config.get(Configuration.SECTION_MAIN).addChild("app");
 		appSection.put("name", CarrotServer.APP_NAME);
 		appSection.put("version", CarrotServer.APP_VERSION);
 
 		// DEBUG-Modus einschalten.
-		if( config.get("carrot", "debug", boolean.class) ) {
+		if( config.get(Configuration.SECTION_MAIN, "debug", boolean.class) ) {
 			Log.enableGlobalDebugging();
 		}
 
 		// Start der App
 		CarrotServer app = new CarrotServer(config);
 		app.start();
-		if( !GraphicsEnvironment.isHeadless() && !config.get("carrot", "headless", boolean.class) ) {
+		if( !GraphicsEnvironment.isHeadless() && !config.get(Configuration.SECTION_MAIN, "headless", boolean.class) ) {
 			app.createGUI();
 		}
 	}
@@ -92,11 +93,6 @@ public class CarrotServer {
 	 */
 	public static final String CONFIG_FILE = "carrot.config";
 
-	/**
-	 * Globaler, einheitlicher Name für die Datei mit Authentifizierungs-Daten.
-	 */
-	public static final String AUTH_FILE = "users.config";
-
 
 	// Logger
 	private static final Log LOG = Log.getLogger(CarrotServer.class);
@@ -120,19 +116,26 @@ public class CarrotServer {
 		this.config = globalConfig;
 
 		// Debugging-Ausgabe
-//		if( !authConfig.isEmpty() ) {
-//			LOG.debug("Authentication data loaded from %s.", authPath);
-//			LOG.debug("Possible logins:");
-//			for( String username : config.getConfig("USERS").keys() ) {
-//				LOG.debug("    %s", username);
-//			}
-//		} else {
-//			LOG.warn("No %s file found in the data dir. You won't be able to log in.", AUTH_FILE);
-//		}
+		LOG.debug("Starting %s with configuration:", APP_NAME);
+		LOG.debug(this.config::toString);
+
+		if( !this.config.get("users").isEmpty() ) {
+			LOG.debug("Possible logins:");
+			for( String username : config.get("users").keySet() ) {
+				LOG.debug("    %s", username);
+			}
+		} else {
+			LOG.warn("No authentication data found in config. You won't be able to log in.");
+		}
+
+		try {
+			LOG.info("%s running on %s / 127.0.0.1", APP_NAME, InetAddress.getLocalHost().getHostAddress());
+		} catch( UnknownHostException ignored ) {
+		}
 	}
 
 	/**
-	 * Erstellt eine GUI für dei App und zeigt sie an.
+	 * Erstellt eine GUI für die App und zeigt sie an.
 	 *
 	 * @return Die neu erstellte GUI-Instanz.
 	 */
@@ -211,25 +214,28 @@ public class CarrotServer {
 	// Interner ServerListener, hauptsächlich für das Logging.
 	private static final ServerListener serverLogger = new ServerListener() {
 		@Override
-		public void started( ServerEvent e ) {
+		public void serverStarted( ServerEvent e ) {
 			LOG.info("Started service %s on port %d", e.server.getProtocolName(), e.server.getPort());
 		}
 
 		@Override
-		public void stopped( ServerEvent e ) {
+		public void serverStopped( ServerEvent e ) {
 			LOG.info("Stopped service %s on port %d", e.server.getProtocolName(), e.server.getPort());
 		}
 
 		@Override
 		public void clientConnected( ServerEvent e ) {
+			LOG.info("%s connected on port %d (%s)", e.clientHandler.getSocket().getRemoteSocketAddress(), e.server.getPort(), e.server.getProtocolName());
 		}
 
 		@Override
 		public void clientDisconnected( ServerEvent e ) {
+			LOG.info("%s disconnected on port %d (%s)", e.clientHandler.getSocket().getRemoteSocketAddress(), e.server.getPort(), e.server.getProtocolName());
 		}
 
 		@Override
 		public void clientTimeout( ServerEvent e ) {
+			LOG.info("%s timed out on port %d (%s)", e.clientHandler.getSocket().getRemoteSocketAddress(), e.server.getPort(), e.server.getProtocolName());
 		}
 
 	};

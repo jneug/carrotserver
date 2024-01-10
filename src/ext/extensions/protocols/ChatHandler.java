@@ -1,7 +1,7 @@
+import org.ini4j.Ini;
 import schule.ngb.carrot.protocol.CommandProtocolHandler;
 import schule.ngb.carrot.protocol.Protocol;
 import schule.ngb.carrot.protocol.ProtocolException;
-import schule.ngb.carrot.util.Configuration;
 
 import java.net.Socket;
 
@@ -12,7 +12,7 @@ public class ChatHandler extends CommandProtocolHandler {
 
 	private String nickname = null;
 
-	public ChatHandler( Socket clientSocket, Configuration config, ChatFactory.Chatroom chatroom ) {
+	public ChatHandler( Socket clientSocket, Ini config, ChatFactory.Chatroom chatroom ) {
 		super(clientSocket, config);
 		this.chatroom = chatroom;
 	}

@@ -1,6 +1,6 @@
+import org.ini4j.Ini;
 import schule.ngb.carrot.protocol.GenericProtocolHandlerFactory;
 import schule.ngb.carrot.protocol.ProtocolHandler;
-import schule.ngb.carrot.util.Configuration;
 
 import java.net.Socket;
 import java.util.LinkedList;
@@ -9,6 +9,7 @@ import java.util.List;
 public class ChatFactory extends GenericProtocolHandlerFactory {
 
 	static final class Chatroom {
+
 		List<ChatHandler> clients;
 
 		public Chatroom() {
@@ -23,7 +24,7 @@ public class ChatFactory extends GenericProtocolHandlerFactory {
 			// Cleanup first
 			clients.removeIf(ChatHandler::isClosed);
 			// Broadcast
-			for( ChatHandler client: clients ) {
+			for( ChatHandler client : clients ) {
 				client.send(source.getNickname() + ": " + message);
 			}
 		}
@@ -32,7 +33,7 @@ public class ChatFactory extends GenericProtocolHandlerFactory {
 			// Cleanup first
 			clients.removeIf(ChatHandler::isClosed);
 			// Broadcast
-			for( ChatHandler client: clients ) {
+			for( ChatHandler client : clients ) {
 				if( !client.equals(source) ) {
 					client.send(source.getNickname() + ": " + message);
 				}
@@ -40,7 +41,7 @@ public class ChatFactory extends GenericProtocolHandlerFactory {
 		}
 
 		public boolean isNicknameFree( String nickname ) {
-			for( ChatHandler client: clients ) {
+			for( ChatHandler client : clients ) {
 				if( nickname.equalsIgnoreCase(client.getNickname()) ) {
 					return false;
 				}
@@ -53,7 +54,7 @@ public class ChatFactory extends GenericProtocolHandlerFactory {
 
 	private final Chatroom chatroom;
 
-	public ChatFactory( Configuration config ) {
+	public ChatFactory( Ini config ) {
 		super(config, ChatHandler.class);
 		chatroom = new Chatroom();
 	}

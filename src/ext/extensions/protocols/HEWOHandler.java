@@ -1,12 +1,13 @@
-import java.net.Socket;
-
+import org.ini4j.Ini;
 import schule.ngb.carrot.protocol.Protocol;
 import schule.ngb.carrot.protocol.StringProtocolHandler;
-import schule.ngb.carrot.util.Configuration;
+
+import java.net.Socket;
 
 @Protocol
 public class HEWOHandler extends StringProtocolHandler {
-	public HEWOHandler( Socket clientSocket, Configuration config ) {
+
+	public HEWOHandler( Socket clientSocket, Ini config ) {
 		super(clientSocket, config);
 	}
 

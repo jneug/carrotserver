@@ -31,7 +31,6 @@ public class EchoHandler extends StringProtocolHandler {
 
 	@Override
 	public void handleConnect() {
-		LOG.info("New client connected from %s", socket.getInetAddress());
 	}
 
 	@Override
@@ -45,7 +44,6 @@ public class EchoHandler extends StringProtocolHandler {
 
 	@Override
 	public void handleDisconnect() {
-		LOG.info("Client disconnected from %s", socket.getInetAddress());
 	}
 
 }
