@@ -58,11 +58,6 @@ public final class ProtocolLoader {
 	private final Ini config;
 
 	/**
-	 * Menge der aktiven Protokolle, die in der Konfiguration definiert wurden.
-	 */
-	private final Set<String> activeProtocols;
-
-	/**
 	 * Erstellt einen {@code ProtocolLoader} mit der angegebenen Konfiguration.
 	 * <p>
 	 * Die Konfiguration bestimmt den {@code DATA} Pfad für das Laden von Erweiterungen, sowie die
@@ -73,16 +68,6 @@ public final class ProtocolLoader {
 	 */
 	public ProtocolLoader( Ini config ) {
 		this.config = config;
-
-		// Menge der aktiven Protokolle vorbereiten (liegt als String-Array vor).
-		// TODO change to new configuration system
-		String[] configProtocols = Configuration.toArray(config.get("carrot", "protocols"));
-		if( configProtocols != null ) {
-			activeProtocols = Arrays.stream(configProtocols).map(String::toUpperCase).collect(Collectors.toSet());
-			LOG.debug("Configured to load protocols %s", activeProtocols);
-		} else {
-			activeProtocols = Set.of();
-		}
 	}
 
 	/**
@@ -137,9 +122,18 @@ public final class ProtocolLoader {
 					try {
 						@SuppressWarnings( "unchecked" )
 						ProtocolHandlerFactory phf = instantiateFactory((Class<? extends ProtocolHandler>) ph, classLoader);
-						if( phf != null && (!activeProtocols.isEmpty() || activeProtocols.contains(phf.getName().toUpperCase())) ) {
-							extensionList.add(phf);
-							LOG.debug("Added extension protocol %s", phf.getName());
+						if( phf != null  ) {
+							boolean isEnabled = true;
+							if( config.get(phf.getName(), "enabled") != null ) {
+								isEnabled = config.get(phf.getName(), "enabled", boolean.class);
+							}
+
+							if( isEnabled ) {
+								extensionList.add(phf);
+								LOG.debug("Added extension protocol %s", phf.getName());
+							} else {
+								LOG.debug("Skipped extension protocol %s", phf.getName());
+							}
 						}
 					} catch( ClassCastException e ) {
 						LOG.error(e, "Error creating extension protocol factory");
@@ -178,9 +172,18 @@ public final class ProtocolLoader {
 				try {
 					@SuppressWarnings( "unchecked" )
 					ProtocolHandlerFactory phf = instantiateFactory((Class<? extends ProtocolHandler>) ph);
-					if( phf != null && (!activeProtocols.isEmpty() || activeProtocols.contains(phf.getName().toUpperCase())) ) {
-						protocolList.add(phf);
-						LOG.debug("Added protocol %s", phf.getName());
+					if( phf != null ) {
+						boolean isEnabled = true;
+						if( config.get(phf.getName(), "enabled") != null ) {
+							isEnabled = config.get(phf.getName(), "enabled", boolean.class);
+						}
+
+						if( isEnabled ) {
+							protocolList.add(phf);
+							LOG.debug("Added protocol %s", phf.getName());
+						} else {
+							LOG.debug("Skipped protocol %s", phf.getName());
+						}
 					} else if( phf != null ){
 						LOG.debug("Skipped protocol %s, not in configuration", phf.getName());
 					} else {
