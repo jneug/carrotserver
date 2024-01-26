@@ -16,6 +16,11 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Eine GUI-Komponente, die Informationen über den Status eines der Protokoll-Server anzeigt.
+ * <p>
+ * Das Panel zeigt den Status und Kontrollelemente für einen {@link Server} an.
+ */
 public class ServerPanel extends JPanel implements ActionListener, ServerListener {
 
 	private static final String ICON_STATUS_RUNNING = "🟢";
@@ -40,10 +45,21 @@ public class ServerPanel extends JPanel implements ActionListener, ServerListene
 	private static final String TEXT_CONNECTION = "%s Verbindungen";
 
 
+	/**
+	 * Der zugehörige Server.
+	 */
 	private final Server server;
 
+	/**
+	 * Zähler für die aktuelle Anzahl an Verbindungen.
+	 */
 	private int connections = 0;
 
+	/**
+	 * Erstellt eine neue Komponente für den angegebenen Server.
+	 *
+	 * @param server Der Server.
+	 */
 	public ServerPanel( Server server ) {
 		this.server = server;
 		this.server.addListener(this);
@@ -58,6 +74,9 @@ public class ServerPanel extends JPanel implements ActionListener, ServerListene
 
 	private JButton jbStartStop, jbDisconnect;
 
+	/**
+	 * Erstellt die Swing-Komponenten.
+	 */
 	private void createComponents() {
 		this.setBorder(
 			BorderFactory.createTitledBorder(
@@ -126,6 +145,10 @@ public class ServerPanel extends JPanel implements ActionListener, ServerListene
 		this.add(jbStartStop, gbc);
 	}
 
+	/**
+	 * Stellt den Zustand der Komponenten auf "gestartet" ein. Die Kind-Komponenten werden
+	 * entsprechend aktiviert / deaktiviert.
+	 */
 	private void setStatusRunning() {
 		jlStatusIcon.setEnabled(true);
 		jspPort.setEnabled(false);
@@ -135,6 +158,10 @@ public class ServerPanel extends JPanel implements ActionListener, ServerListene
 		this.setBackground(CarrotGUI.COLOR_CARROT_GREEN_LIGHT);
 	}
 
+	/**
+	 * Stellt den Zustand der Komponenten auf "gestoppt" ein. Die Kind-Komponenten werden
+	 * entsprechend aktiviert / deaktiviert.
+	 */
 	private void setStatusStopped() {
 		jlStatusIcon.setEnabled(false);
 		jspPort.setEnabled(true);
@@ -144,6 +171,9 @@ public class ServerPanel extends JPanel implements ActionListener, ServerListene
 		this.setBackground(new Color(240, 240, 240));
 	}
 
+	/**
+	 * Aktualisiert die Anzeige der aktuell bestehenden Verbindungen.
+	 */
 	public void updateConnectionCount() {
 		jlConnectionCount.setText(String.format(TEXT_CONNECTION, this.connections));
 	}

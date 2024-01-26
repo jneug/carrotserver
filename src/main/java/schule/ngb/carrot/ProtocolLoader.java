@@ -2,10 +2,8 @@ package schule.ngb.carrot;
 
 import dorkbox.annotation.AnnotationDefaults;
 import dorkbox.annotation.AnnotationDetector;
-import org.ini4j.Config;
 import org.ini4j.Ini;
 import schule.ngb.carrot.protocol.*;
-import schule.ngb.carrot.util.Configuration;
 import schule.ngb.carrot.util.Log;
 
 import javax.tools.*;
@@ -19,16 +17,18 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 /**
  * Erstellt eine Liste mit Protokollen (bzw. {@link ProtocolHandler}n), die bei diesem Start vom
  * Server verfügbar gemacht werden sollen.
  * <p>
- * Dazu werden die nativen Protokolle aus {@link schule.ngb.carrot.protocol} geladen, sowie
- * mögliche Erweiterungen, die im {@code DATA_PATH} abgelegt wurden.
+ * Dazu werden die nativen Protokolle aus {@link schule.ngb.carrot.protocol} geladen, sowie mögliche
+ * Erweiterungen, die im {@code DATA_PATH} abgelegt wurden.
  * <p>
  * Erweiterungen können vorkompilierte {@code .class} Dateien sein, oder {@code .java} Dateien, die
  * dynamisch bei Programmstart kompiliert werden. Eine Protokoll-Erweiterung muss das
@@ -122,7 +122,7 @@ public final class ProtocolLoader {
 					try {
 						@SuppressWarnings( "unchecked" )
 						ProtocolHandlerFactory phf = instantiateFactory((Class<? extends ProtocolHandler>) ph, classLoader);
-						if( phf != null  ) {
+						if( phf != null ) {
 							boolean isEnabled = true;
 							if( config.get(phf.getName(), "enabled") != null ) {
 								isEnabled = config.get(phf.getName(), "enabled", boolean.class);
@@ -160,42 +160,48 @@ public final class ProtocolLoader {
 	public List<ProtocolHandlerFactory> loadBuildinProtocols() {
 		List<ProtocolHandlerFactory> protocolList = new ArrayList<>(6);
 
-		try {
-			// Paket nach Annotation durchsuchen
-			List<Class<?>> protocols = AnnotationDetector.scanClassPath("schule.ngb.carrot.protocol")
-				.forAnnotations(Protocol.class)
-				.on(ElementType.TYPE)
-				.collect(AnnotationDefaults.getType);
+//		try {
+//			// Paket nach Annotation durchsuchen
+//			List<Class<?>> protocols = AnnotationDetector.scanClassPath("schule.ngb.carrot.protocol")
+//				.forAnnotations(Protocol.class)
+//				.on(ElementType.TYPE)
+//				.collect(AnnotationDefaults.getType);
+//		} catch( IOException e ) {
+//			LOG.error(e, "Error loading classes");
+//		}
 
-			// Factory-Klassen instanziieren.
-			for( Class<?> ph : protocols ) {
-				try {
-					@SuppressWarnings( "unchecked" )
-					ProtocolHandlerFactory phf = instantiateFactory((Class<? extends ProtocolHandler>) ph);
-					if( phf != null ) {
-						boolean isEnabled = true;
-						if( config.get(phf.getName(), "enabled") != null ) {
-							isEnabled = config.get(phf.getName(), "enabled", boolean.class);
-						}
+		List<Class<?>> protocols = new LinkedList<>();
+		protocols.add(EchoHandler.class);
+		protocols.add(POP3Handler.class);
+		protocols.add(SMTPHandler.class);
 
-						if( isEnabled ) {
-							protocolList.add(phf);
-							LOG.debug("Added protocol %s", phf.getName());
-						} else {
-							LOG.debug("Skipped protocol %s", phf.getName());
-						}
-					} else if( phf != null ){
-						LOG.debug("Skipped protocol %s, not in configuration", phf.getName());
-					} else {
-						LOG.warn("Failed to add protocol for %s", ph.getSimpleName());
+		// Factory-Klassen instanziieren.
+		for( Class<?> ph : protocols ) {
+			try {
+				@SuppressWarnings( "unchecked" )
+				ProtocolHandlerFactory phf = instantiateFactory((Class<? extends ProtocolHandler>) ph);
+				if( phf != null ) {
+					boolean isEnabled = true;
+					if( config.get(phf.getName(), "enabled") != null ) {
+						isEnabled = config.get(phf.getName(), "enabled", boolean.class);
 					}
-				} catch( ClassCastException e ) {
-					LOG.error(e, "Error creating protocol factory");
+
+					if( isEnabled ) {
+						protocolList.add(phf);
+						LOG.debug("Added protocol %s", phf.getName());
+					} else {
+						LOG.debug("Skipped protocol %s", phf.getName());
+					}
+				} else if( phf != null ) {
+					LOG.debug("Skipped protocol %s, not in configuration", phf.getName());
+				} else {
+					LOG.warn("Failed to add protocol for %s", ph.getSimpleName());
 				}
+			} catch( ClassCastException e ) {
+				LOG.error(e, "Error creating protocol factory");
 			}
-		} catch( IOException e ) {
-			LOG.error(e, "Error loading classes");
 		}
+
 		return protocolList;
 	}
 

@@ -17,7 +17,10 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 /**
@@ -165,6 +168,22 @@ public class CarrotGUI extends JFrame implements WindowListener, ActionListener,
 
 		int pad = 8;
 
+		JPanel ipPanel = new JPanel();
+		ipPanel.setBackground(COLOR_CARROT_ORANGE_LIGHT);
+		JLabel jlIP = new JLabel();
+		try {
+			jlIP.setText(InetAddress.getLocalHost().getHostAddress());
+			ipPanel.add(jlIP);
+
+			try( InputStream in = ServerPanel.class.getResourceAsStream("carrot_16.png") ) {
+				if( in != null ) {
+					jlIP.setIcon(new ImageIcon(ImageIO.read(in)));
+				}
+			} catch( IOException ignored ) {
+			}
+		} catch( UnknownHostException ignored ) {
+		}
+
 		JPanel serverPanel = new JPanel();
 		serverPanel.setBackground(COLOR_CARROT_ORANGE_LIGHT);
 		serverPanel.setBorder(BorderFactory.createEmptyBorder(pad, pad, pad, pad));
@@ -182,6 +201,7 @@ public class CarrotGUI extends JFrame implements WindowListener, ActionListener,
 		buttonPanel.add(jbQuit);
 
 		this.setBackground(COLOR_CARROT_ORANGE);
+		this.add(ipPanel, BorderLayout.NORTH);
 		this.add(serverPanel, BorderLayout.CENTER);
 		this.add(buttonPanel, BorderLayout.SOUTH);
 		//this.setContentPane(mainPanel);

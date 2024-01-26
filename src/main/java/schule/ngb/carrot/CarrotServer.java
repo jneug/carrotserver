@@ -11,6 +11,7 @@ import schule.ngb.carrot.util.Configuration;
 import schule.ngb.carrot.util.Log;
 
 import java.awt.GraphicsEnvironment;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
@@ -18,12 +19,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.*;
 
 /**
  * Hauptklasse von <strong>CarrotServ</strong>.
  * <p>
  * Lädt {@link Configuration Konfigurationsdateien} und {@link ProtocolLoader Protokolle} und
- * initislisiert die {@link Server}, sowie die {@link CarrotGUI GUI}.
+ * initialisiert die {@link Server}, sowie die {@link CarrotGUI GUI}.
  */
 public class CarrotServer {
 
@@ -32,8 +34,8 @@ public class CarrotServer {
 	 *
 	 * @param args Kommandozielenargumente
 	 */
-	public static void main( String[] args ) {
-		// Kommandozeile parsen
+	public static void main( String[] args ) throws IOException {
+		// Kommandozeile parsen (Apache commons-cli)
 		CommandLine cli = Configuration.parseCli(args);
 
 		// Kommandozeile auf spezifische Config-Datei prüfen
@@ -45,29 +47,37 @@ public class CarrotServer {
 			}
 		}
 
-		// App-Konfiguration aufbauen, beginnend mit der Default-Konfiguration
+		// App-Konfiguration aufbauen, beginnend mit der Default-Konfiguration (ini4j)
 		Ini config;
 		config = Configuration.from()
 			.load(CarrotServer.class.getResourceAsStream(CONFIG_FILE))
 			.load(configFile)
 			.build();
+		// Der DATA_PATH könnte sich bis hier geändert haben, dort nach carrot.config suchen.
 		config = Configuration.from(config)
 			.load(Paths.get(config.get(Configuration.SECTION_MAIN, "data"), CONFIG_FILE))
 			.load(cli)
 			.build();
-		// App information for dynamic replacements
+		// Statische App-Informationen ergänzen
 		Profile.Section appSection = config.get(Configuration.SECTION_MAIN).addChild("app");
 		appSection.put("name", CarrotServer.APP_NAME);
 		appSection.put("version", CarrotServer.APP_VERSION);
 
-		// DEBUG-Modus einschalten.
+		// ggf. DEBUG-Modus einschalten.
 		if( config.get(Configuration.SECTION_MAIN, "debug", boolean.class) ) {
 			Log.enableGlobalDebugging();
+
+			FileHandler fh = new FileHandler("carrot.log", true);
+			fh.setFormatter(new SimpleFormatter());
+
+			Logger rootLogger = Logger.getLogger("");
+			rootLogger.addHandler(fh);
 		}
 
 		// Start der App
 		CarrotServer app = new CarrotServer(config);
 		app.start();
+		// ggf. GUI initialisieren
 		if( !GraphicsEnvironment.isHeadless() && !config.get(Configuration.SECTION_MAIN, "headless", boolean.class) ) {
 			app.createGUI();
 		}
@@ -82,11 +92,6 @@ public class CarrotServer {
 	 * Globale Version der App.
 	 */
 	public static final String APP_VERSION = "0.0.9";
-
-	/**
-	 * Globaler Pfad zum DATA-Ordner. Der {@code DATA_PATH} ist immer fest gesetzt.
-	 */
-	public static final String DATA_PATH = "data";
 
 	/**
 	 * Globaler, einheitlicher Name der Konfigurationsdateien.
