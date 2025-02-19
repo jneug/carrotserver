@@ -1,5 +1,6 @@
 package schule.ngb.carrot.gui;
 
+import org.intellij.lang.annotations.Flow;
 import schule.ngb.carrot.Server;
 import schule.ngb.carrot.events.ServerEvent;
 import schule.ngb.carrot.events.ServerListener;
@@ -7,10 +8,7 @@ import schule.ngb.carrot.events.ServerListener;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
-import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -68,6 +66,8 @@ public class ServerPanel extends JPanel implements ActionListener, ServerListene
 	}
 
 
+	private JPanel jpBasePanel;
+
 	private JLabel jlStatusIcon, jlConnectionCount;
 
 	private JSpinner jspPort;
@@ -80,11 +80,13 @@ public class ServerPanel extends JPanel implements ActionListener, ServerListene
 	private void createComponents() {
 		this.setBorder(
 			BorderFactory.createTitledBorder(
-				BorderFactory.createBevelBorder(BevelBorder.RAISED),
+				// BorderFactory.createBevelBorder(BevelBorder.RAISED),
+				// BorderFactory.createEmptyBorder(),
+				BorderFactory.createEtchedBorder(),
 				server.getProtocolName()
 			)
 		);
-		this.setBackground(CarrotGUI.COLOR_CARROT_GREEN_LIGHT);
+//		this.setBackground(CarrotGUI.COLOR_CARROT_GREEN_LIGHT);
 
 		jlStatusIcon = new JLabel();
 		try( InputStream in = ServerPanel.class.getResourceAsStream("carrot_32.png") ) {
@@ -108,41 +110,51 @@ public class ServerPanel extends JPanel implements ActionListener, ServerListene
 		jlConnectionCount = new JLabel();
 		updateConnectionCount();
 
+//		GridBagLayout gbl = new GridBagLayout();
+//		GridBagConstraints gbc = new GridBagConstraints();
+//		gbl.setConstraints(this, gbc);
+//		this.setLayout(gbl);
+
+//		gbc.fill = GridBagConstraints.BOTH;
+//		gbc.anchor = GridBagConstraints.CENTER;
+//		gbc.insets = new Insets(2, 4, 2, 4);
+//
+//		gbc.gridx = 0;
+//		gbc.gridy = 0;
+//		gbc.gridwidth = 1;
+//		gbc.gridheight = 2;
+//		this.add(jlStatusIcon, gbc);
+//
+//		gbc.gridx = 1;
+//		gbc.gridwidth = GridBagConstraints.REMAINDER;
+//		gbc.gridheight = 1;
+//		this.add(jspPort, gbc);
+//
+//		gbc.gridy += 1;
+//		this.add(jlConnectionCount, gbc);
+//
+//		gbc.gridx = 0;
+//		gbc.gridy += 1;
+//		this.add(jbDisconnect, gbc);
+//
+//		gbc.gridy += 1;
+//		this.add(jbStartStop, gbc);
+
+		jpBasePanel = new JPanel();
+		jpBasePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
+		jpBasePanel.add(jlStatusIcon);
+		jpBasePanel.add(jspPort);
+		jpBasePanel.add(jlConnectionCount);
+		jpBasePanel.add(jbDisconnect);
+		jpBasePanel.add(jbStartStop);
+
+		this.add(jpBasePanel);
+
 		if( server.isRunning() ) {
 			this.setStatusRunning();
 		} else {
 			this.setStatusStopped();
 		}
-
-		GridBagLayout gbl = new GridBagLayout();
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbl.setConstraints(this, gbc);
-		this.setLayout(gbl);
-
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.anchor = GridBagConstraints.CENTER;
-		gbc.insets = new Insets(2, 4, 2, 4);
-
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		gbc.gridwidth = 1;
-		gbc.gridheight = 2;
-		this.add(jlStatusIcon, gbc);
-
-		gbc.gridx = 1;
-		gbc.gridwidth = GridBagConstraints.REMAINDER;
-		gbc.gridheight = 1;
-		this.add(jspPort, gbc);
-
-		gbc.gridy += 1;
-		this.add(jlConnectionCount, gbc);
-
-		gbc.gridx = 0;
-		gbc.gridy += 1;
-		this.add(jbDisconnect, gbc);
-
-		gbc.gridy += 1;
-		this.add(jbStartStop, gbc);
 	}
 
 	/**
@@ -155,7 +167,8 @@ public class ServerPanel extends JPanel implements ActionListener, ServerListene
 		jbStartStop.setText(TEXT_STOP);
 		jbDisconnect.setEnabled(true);
 		jlConnectionCount.setEnabled(true);
-		this.setBackground(CarrotGUI.COLOR_CARROT_GREEN_LIGHT);
+//		this.setBackground(CarrotGUI.COLOR_CARROT_GREEN_LIGHT);
+//		jpBasePanel.setBackground(new Color(200, 200, 200));
 	}
 
 	/**
@@ -168,7 +181,7 @@ public class ServerPanel extends JPanel implements ActionListener, ServerListene
 		jbStartStop.setText(TEXT_START);
 		jbDisconnect.setEnabled(false);
 		jlConnectionCount.setEnabled(false);
-		this.setBackground(new Color(240, 240, 240));
+//		jpBasePanel.setBackground(new Color(240, 240, 240));
 	}
 
 	/**

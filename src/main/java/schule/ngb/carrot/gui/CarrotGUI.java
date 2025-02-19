@@ -169,7 +169,8 @@ public class CarrotGUI extends JFrame implements WindowListener, ActionListener,
 		int pad = 8;
 
 		JPanel ipPanel = new JPanel();
-		ipPanel.setBackground(COLOR_CARROT_ORANGE_LIGHT);
+		ipPanel.setBorder(BorderFactory.createLoweredSoftBevelBorder());
+//		ipPanel.setBackground(COLOR_CARROT_ORANGE_LIGHT);
 		JLabel jlIP = new JLabel();
 		try {
 			jlIP.setText(InetAddress.getLocalHost().getHostAddress());
@@ -185,14 +186,16 @@ public class CarrotGUI extends JFrame implements WindowListener, ActionListener,
 		}
 
 		JPanel serverPanel = new JPanel();
-		serverPanel.setBackground(COLOR_CARROT_ORANGE_LIGHT);
-		serverPanel.setBorder(BorderFactory.createEmptyBorder(pad, pad, pad, pad));
-		serverPanel.setLayout(new GridLayout(gridRows, gridCols, pad, pad));
+//		serverPanel.setBackground(COLOR_CARROT_ORANGE_LIGHT);
+		serverPanel.setBorder(BorderFactory.createEmptyBorder());
+		// serverPanel.setLayout(new GridLayout(gridRows, gridCols, pad, pad));
+		serverPanel.setLayout(new BoxLayout(serverPanel, BoxLayout.Y_AXIS));
 		for( Server server : app.getServices() ) {
 			serverPanel.add(new ServerPanel(server));
 		}
 
 		JPanel buttonPanel = new JPanel();
+		buttonPanel.setBorder(BorderFactory.createLoweredSoftBevelBorder());
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
 		jbQuit = new JButton("Server stoppen");
@@ -200,7 +203,7 @@ public class CarrotGUI extends JFrame implements WindowListener, ActionListener,
 		jbQuit.addActionListener(this);
 		buttonPanel.add(jbQuit);
 
-		this.setBackground(COLOR_CARROT_ORANGE);
+//		this.setBackground(COLOR_CARROT_ORANGE);
 		this.add(ipPanel, BorderLayout.NORTH);
 		this.add(serverPanel, BorderLayout.CENTER);
 		this.add(buttonPanel, BorderLayout.SOUTH);
