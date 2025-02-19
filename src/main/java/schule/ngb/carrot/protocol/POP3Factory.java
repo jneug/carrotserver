@@ -35,6 +35,7 @@ public class POP3Factory extends GenericProtocolHandlerFactory {
 
 				if( restore ) {
 					maildrop.restoreDeleted();
+					LOG.debug("Restored mails from trash for user %s", user);
 				}
 			} catch( MaildropException ex ) {
 				LOG.error(ex, "failed to restore mails for user %s", user);

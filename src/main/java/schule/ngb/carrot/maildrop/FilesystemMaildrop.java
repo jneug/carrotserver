@@ -70,6 +70,11 @@ public class FilesystemMaildrop implements Maildrop {
 		updateFileList();
 	}
 
+	/**
+	 * Updates the list of eml-files present on the filesystem.
+	 * Only new mails are added to the lsit of files (identified by the filepath).
+	 * @throws MaildropException
+	 */
 	public void updateFileList() throws MaildropException {
 		List<Path> mailList = null;
 		try {
@@ -82,6 +87,7 @@ public class FilesystemMaildrop implements Maildrop {
 			throw new MaildropException(e);
 		}
 		for( Path p : mailList ) {
+			// TODO: maybe check mtime for updates?
 			if( Files.isReadable(p) && !Files.isDirectory(p) && !mails.containsKey(p) ) {
 				mails.put(p,
 					new Mail(mails.size() + 1, p)
@@ -186,7 +192,10 @@ public class FilesystemMaildrop implements Maildrop {
 
 	@Override
 	public void resetDeleted() {
-		getMailStream(true).map(( m ) -> m.deleted = false);
+		// getMailStream(true).peek(( m ) -> m.deleted = false);
+		for( Mail m : getMailStream(true).collect(Collectors.toList()) ) {
+			m.deleted = false;
+		}
 	}
 
 	@Override
@@ -198,7 +207,7 @@ public class FilesystemMaildrop implements Maildrop {
 				ensureTrashExists();
 				try {
 					Files.move(mail.file, trash.resolve(mail.file.getFileName()), StandardCopyOption.REPLACE_EXISTING);
-					LOG.error("Moved mail file %s/%s to trash", mail.file.getParent().getFileName(), mail.file.getFileName());
+					LOG.debug("Moved mail file %s/%s to trash", mail.file.getParent().getFileName(), mail.file.getFileName());
 				} catch( IOException e ) {
 					LOG.error(e, "Failed to move mail file %s/%s to trash", mail.file.getParent().getFileName(), mail.file.getFileName());
 					throw new MaildropException(e);

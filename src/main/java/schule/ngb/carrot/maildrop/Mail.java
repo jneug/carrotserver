@@ -47,6 +47,7 @@ public final class Mail {
 		if( hash == null ) {
 			try {
 				MessageDigest md5 = MessageDigest.getInstance("md5");
+				// TODO: need to consider charset here?
 				md5.update(StandardCharsets.UTF_8.encode(getText()));
 				hash = String.format("%032x", new BigInteger(1, md5.digest()));
 			} catch( NoSuchAlgorithmException e ) {
