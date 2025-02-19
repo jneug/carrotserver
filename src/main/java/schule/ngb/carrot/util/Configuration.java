@@ -152,7 +152,7 @@ public class Configuration {
 					if( this.ini == null ) {
 						init().load(source);
 					} else {
-						this.ini = merge(this.ini, newIni(source));
+						this.ini = merge(newIni(source), this.ini);
 					}
 				} catch( IOException ignored ) {
 				}
