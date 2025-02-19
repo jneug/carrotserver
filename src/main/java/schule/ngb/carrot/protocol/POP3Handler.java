@@ -460,7 +460,7 @@ public class POP3Handler extends StringProtocolHandler {
 	}
 
 	private void sendErr( String message, Object... args ) {
-		sendOk(String.format(message, args));
+		sendErr(String.format(message, args));
 	}
 
 }
