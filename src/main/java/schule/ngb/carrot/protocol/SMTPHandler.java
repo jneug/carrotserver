@@ -2,9 +2,8 @@ package schule.ngb.carrot.protocol;
 
 import org.ini4j.Ini;
 import schule.ngb.carrot.CarrotServer;
-import schule.ngb.carrot.protocol.SMTPFactory.TransmissionQueue;
 import schule.ngb.carrot.maildrop.MailAddress;
-import schule.ngb.carrot.util.Configuration;
+import schule.ngb.carrot.protocol.SMTPFactory.TransmissionQueue;
 import schule.ngb.carrot.util.Log;
 
 import java.net.Socket;
@@ -13,7 +12,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
-@Protocol( name="smtp", port=25, factory=SMTPFactory.class )
+@Protocol( name = "smtp", port = 25, factory = SMTPFactory.class )
 public class SMTPHandler extends StringProtocolHandler {
 
 	private static final Log LOG = Log.getLogger(SMTPHandler.class);
@@ -94,7 +93,7 @@ public class SMTPHandler extends StringProtocolHandler {
 	@Override
 	public void handleConnect() {
 		send(STATUS_READY, "%s SMTP ready on %s (v%s)",
-			config.get("host"),
+			config.get("carrot", "host"),
 			CarrotServer.APP_NAME, CarrotServer.APP_VERSION
 		);
 	}
@@ -256,7 +255,7 @@ public class SMTPHandler extends StringProtocolHandler {
 		MailAddress rcptAddr = MailAddress.parseString(value.substring(3));
 		if( config.get("smtp", "accept_any_rcpt", boolean.class)
 			|| (isLocalMailPath(rcptAddr)
-				&& config.get("users", rcptAddr.getMailbox()) != null) ) {
+			&& config.get("users", rcptAddr.getMailbox()) != null) ) {
 			recipients.add(rcptAddr);
 			send(STATUS_OK, "OK");
 		} else {

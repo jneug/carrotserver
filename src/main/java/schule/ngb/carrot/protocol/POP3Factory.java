@@ -4,7 +4,6 @@ import org.ini4j.Ini;
 import schule.ngb.carrot.maildrop.FilesystemMaildrop;
 import schule.ngb.carrot.maildrop.Maildrop;
 import schule.ngb.carrot.maildrop.MaildropException;
-import schule.ngb.carrot.util.Configuration;
 import schule.ngb.carrot.util.Log;
 
 import java.net.Socket;
@@ -28,7 +27,7 @@ public class POP3Factory extends GenericProtocolHandlerFactory {
 		boolean restore = config.get("pop3", "restore_trash_on_start", boolean.class);
 		for( String user : config.get("users").keySet() ) {
 			try {
-				Maildrop maildrop = new FilesystemMaildrop(user, config);
+				Maildrop maildrop = new FilesystemMaildrop(user, config.get("pop3", "maildrop"), config);
 				if( maildrop.isLocked() ) {
 					maildrop.unlock();
 				}

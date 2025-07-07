@@ -4,11 +4,8 @@ import org.ini4j.Ini;
 import schule.ngb.carrot.util.Configuration;
 import schule.ngb.carrot.util.Log;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
-import java.nio.file.Paths;
 
 public class GenericProtocolHandlerFactory implements ProtocolHandlerFactory {
 
@@ -36,9 +33,6 @@ public class GenericProtocolHandlerFactory implements ProtocolHandlerFactory {
 	 */
 	protected final Ini config;
 
-	/**
-	 * Klasse des
-	 */
 	protected final Class<? extends ProtocolHandler> type;
 
 	public GenericProtocolHandlerFactory( Ini globalConfig, Class<? extends ProtocolHandler> type ) {
@@ -46,9 +40,10 @@ public class GenericProtocolHandlerFactory implements ProtocolHandlerFactory {
 
 		processAnnotation();
 
-		this.config = Configuration.from(globalConfig)
-			.load(type.getResourceAsStream(this.configFile))
-			.build();
+		this.config = this.loadConfig(globalConfig);
+
+		LOG.debug("Created %s with configuration:", getClass().getSimpleName());
+		LOG.debug(this.config::toString);
 
 		// Look for custom port in configuration
 		if( this.config.get(this.name, "port") != null ) {
@@ -57,7 +52,22 @@ public class GenericProtocolHandlerFactory implements ProtocolHandlerFactory {
 	}
 
 	/**
-	 * Prüft den {@link #type }ProtocolHandler} auf die {@link Protocol} Annotation und lädt die
+	 * Lädt die Konfiguration für dieses spezifische Protokoll, indem die {@var globalConfig} mit
+	 * einer eventuell vorhandenen Protokoll-Konfiguration zusammengeführt wird.
+	 * <p>
+	 * Unterklassen können die Methode überschreiben, um die Konfigurration individuell zu
+	 * modifizieren.
+	 *
+	 * @return Die Konfiguration für dieses Protokoll.
+	 */
+	protected Ini loadConfig( Ini globalConfig ) {
+		return Configuration.from(globalConfig)
+			.loadLeft(type.getResourceAsStream(this.configFile))
+			.build();
+	}
+
+	/**
+	 * Prüft den {@link #type ProtocolHandler} auf die {@link Protocol} Annotation und lädt die
 	 * bereitgestellten Daten.
 	 */
 	private void processAnnotation() {
@@ -79,6 +89,10 @@ public class GenericProtocolHandlerFactory implements ProtocolHandlerFactory {
 
 	public int getPort() {
 		return this.port;
+	}
+
+	public String getConfigFile() {
+		return configFile;
 	}
 
 	public Ini getConfig() {

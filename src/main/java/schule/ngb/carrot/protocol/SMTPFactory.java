@@ -49,6 +49,7 @@ public class SMTPFactory extends GenericProtocolHandlerFactory {
 				public void run() {
 					// Add random delay to simulate slow network
 					int delay = config.get("smtp", "random_send_delay", int.class);
+					LOG.debug("Message queued for transmission from mailbox %s (%d bytes)", from.getMailbox(), content.getBytes(StandardCharsets.UTF_8).length);
 					if( delay > 0 ) {
 						try {
 							Thread.sleep(new Random().nextInt(delay));
@@ -60,7 +61,7 @@ public class SMTPFactory extends GenericProtocolHandlerFactory {
 					for( MailAddress addr : recipients ) {
 						if( isLocalAddress(addr) && users.containsKey(addr.getMailbox()) ) {
 							try {
-								Maildrop maildrop = new FilesystemMaildrop(addr.getMailbox(), config);
+								Maildrop maildrop = new FilesystemMaildrop(addr.getMailbox(), config.get("smtp", "maildrop"), config);
 								maildrop.createMail(content);
 								LOG.debug("Created new mail in mailbox %s (%d bytes)", addr.getMailbox(), content.getBytes(StandardCharsets.UTF_8).length);
 							} catch( MaildropException e ) {
@@ -68,7 +69,7 @@ public class SMTPFactory extends GenericProtocolHandlerFactory {
 							}
 						} else if( config.get("smtp", "create_error_mails", boolean.class) && isLocalAddress(from) && users.containsKey(from.getMailbox()) ) {
 							try {
-								Maildrop maildrop = new FilesystemMaildrop(from.getMailbox(), config);
+								Maildrop maildrop = new FilesystemMaildrop(from.getMailbox(), config.get("smtp", "maildrop"), config);
 								maildrop.createMail(
 									String.format(getFailureNotice(),
 										"4Sc6Cj3Nvxz9sT7.1700811207",
@@ -83,12 +84,12 @@ public class SMTPFactory extends GenericProtocolHandlerFactory {
 							} catch( MaildropException e ) {
 								LOG.error(e, "Failed to open mailbox for user %s", from.getMailbox());
 							}
+						} else {
+							LOG.debug("Transmission to recipient %s completed (NOOP).", addr.toString());
 						}
 					}
 				}
 			});
-
-			// LOG.debug("Mail from %s queued for transmission (%f bytes)", from.toString(), 0);
 
 			count += 1;
 			return count;
@@ -123,10 +124,24 @@ public class SMTPFactory extends GenericProtocolHandlerFactory {
 
 	private TransmissionQueue transmissionQueue;
 
-
 	public SMTPFactory( Ini config ) {
 		super(config, SMTPHandler.class);
 		transmissionQueue = new TransmissionQueue();
+	}
+
+	@Override
+	protected Ini loadConfig( Ini globalConfig ) {
+		Ini config = Configuration.from(globalConfig)
+			.loadLeft(type.getResourceAsStream(this.getConfigFile()))
+			.build();
+
+		if( globalConfig.get("smtp", "maildrop") == null ) {
+			if( globalConfig.get("pop3", "maildrop") != null ) {
+				config.put("smtp", "maildrop", config.get("pop3", "maildrop"));
+			}
+		}
+
+		return config;
 	}
 
 	@Override

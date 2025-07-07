@@ -6,8 +6,8 @@ import schule.ngb.carrot.maildrop.FilesystemMaildrop;
 import schule.ngb.carrot.maildrop.Mail;
 import schule.ngb.carrot.maildrop.Maildrop;
 import schule.ngb.carrot.maildrop.MaildropException;
-import schule.ngb.carrot.util.Log;
 import schule.ngb.carrot.util.Configuration;
+import schule.ngb.carrot.util.Log;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -19,15 +19,18 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.List;
 
-@Protocol( name="pop3", port=110, factory=POP3Factory.class )
+@Protocol( name = "pop3", port = 110, factory = POP3Factory.class )
 public class POP3Handler extends StringProtocolHandler {
 
 	private static final Log LOG = Log.getLogger(POP3Handler.class);
 
 
 	public static final int STATE_AUTHORIZATION = 0;
+
 	public static final int STATE_TRANSACTION = 1;
+
 	public static final int STATE_UPDATE = 2;
+
 	public static final char TERMINATOR = '.';
 
 
@@ -48,7 +51,7 @@ public class POP3Handler extends StringProtocolHandler {
 	}
 
 	public boolean hasCapability( String capa ) {
-		for( String c: capabilities ) {
+		for( String c : capabilities ) {
 			if( capa.equalsIgnoreCase(c) ) {
 				return true;
 			}
@@ -240,7 +243,9 @@ public class POP3Handler extends StringProtocolHandler {
 	}
 
 	private void createMaildrop() throws ProtocolException, IOException {
-		maildrop = new FilesystemMaildrop(username, config);
+		maildrop = new FilesystemMaildrop(
+			username, config.get("pop3", "maildrop"), config);
+
 		if( maildrop.isLocked() ) {
 			maildrop = null;
 			username = null;

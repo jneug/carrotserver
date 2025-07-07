@@ -108,6 +108,8 @@ public abstract class StringProtocolHandler extends GenericProtocolHandler {
 
 	public void send( String message ) {
 		if( isRunning() ) {
+			LOG.debug("%s send: %s", this.getClass().getSimpleName(), message);
+
 			out.print(message);
 			out.print(CRLF);
 			out.flush();
@@ -116,6 +118,8 @@ public abstract class StringProtocolHandler extends GenericProtocolHandler {
 
 	public void send( String message, Object... args ) {
 		if( isRunning() ) {
+			LOG.debug("%s send: %s", this.getClass().getSimpleName(), String.format(message, args));
+
 			out.print(String.format(message, args));
 			out.print(CRLF);
 			out.flush();
