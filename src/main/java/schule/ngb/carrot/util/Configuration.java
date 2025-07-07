@@ -152,7 +152,7 @@ public class Configuration {
 					if( this.ini == null ) {
 						init().load(source);
 					} else {
-						this.ini = merge(newIni(source), this.ini);
+						this.ini = merge(this.ini, newIni(source));
 					}
 				} catch( IOException ignored ) {
 				}
@@ -194,15 +194,25 @@ public class Configuration {
 		}
 
 
-		public ConfigBuilder loadLeft( Path source ) throws IOException {
+		public ConfigBuilder loadLeft( Path source ) {
 			try( InputStream in = Files.newInputStream(source) ) {
-				this.ini = Configuration.merge(newIni(in), init());
+				loadLeft(in);
+			} catch( IOException ignored ) {
 			}
 			return this;
 		}
 
-		public ConfigBuilder loadLeft( InputStream source ) throws IOException {
-			this.ini = Configuration.merge(newIni(source), init());
+		public ConfigBuilder loadLeft( InputStream source ) {
+			if( source != null ) {
+				try {
+					if( this.ini == null ) {
+						init().load(source);
+					} else {
+						this.ini = merge(newIni(source), this.ini);
+					}
+				} catch( IOException ignored ) {
+				}
+			}
 			return this;
 		}
 
