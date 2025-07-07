@@ -1,10 +1,6 @@
 package schule.ngb.carrot.maildrop;
 
-import static schule.ngb.carrot.util.Configuration.SECTION_MAIN;
-import static schule.ngb.carrot.util.Configuration.SECTION_USERS;
-
 import org.ini4j.Ini;
-import schule.ngb.carrot.util.Configuration;
 import schule.ngb.carrot.util.Log;
 
 import java.io.IOException;
@@ -17,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static schule.ngb.carrot.util.Configuration.SECTION_MAIN;
 
 public class FilesystemMaildrop implements Maildrop {
 
@@ -24,13 +21,16 @@ public class FilesystemMaildrop implements Maildrop {
 
 		private final Ini config;
 
-		public Factory( Ini config ) {
+		private String maildrop;
+
+		public Factory( String maildrop, Ini config ) {
+			this.maildrop = maildrop;
 			this.config = config;
 		}
 
 		@Override
 		public Maildrop create( String username ) throws MaildropException {
-			return new FilesystemMaildrop(username, this.config);
+			return new FilesystemMaildrop(username, this.maildrop, this.config);
 		}
 
 	}
@@ -48,13 +48,12 @@ public class FilesystemMaildrop implements Maildrop {
 
 	private final HashMap<Path, Mail> mails;
 
-	public FilesystemMaildrop( String username, Ini config ) throws MaildropException {
+	public FilesystemMaildrop( String username, String maildrop, Ini config ) throws MaildropException {
 		this.config = config;
 
-		// TODO xxx
-		root= Paths.get(
+		this.root = Paths.get(
 			this.config.get(SECTION_MAIN, "data"),
-			this.config.get("pop3", "maildrop"),
+			maildrop,
 			username
 		);
 		if( !Files.exists(root) ) {
@@ -71,8 +70,9 @@ public class FilesystemMaildrop implements Maildrop {
 	}
 
 	/**
-	 * Updates the list of eml-files present on the filesystem.
-	 * Only new mails are added to the lsit of files (identified by the filepath).
+	 * Updates the list of eml-files present on the filesystem. Only new mails are added to the lsit
+	 * of files (identified by the filepath).
+	 *
 	 * @throws MaildropException
 	 */
 	public void updateFileList() throws MaildropException {

@@ -64,6 +64,8 @@ public class CarrotServer {
 		appSection.put("version", CarrotServer.APP_VERSION);
 
 		// ggf. DEBUG-Modus einschalten.
+		// TODO: configure log output format (file, console, gui)
+		// TODO: configure log filters (per protocol ...)
 		if( config.get(Configuration.SECTION_MAIN, "debug", boolean.class) ) {
 			Log.enableGlobalDebugging();
 

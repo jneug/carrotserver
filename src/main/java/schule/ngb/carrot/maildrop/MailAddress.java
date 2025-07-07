@@ -8,6 +8,7 @@ public class MailAddress {
 
 	private final MailAddress[] path;
 
+	// TODO: lowercase strings but keep original formating?
 	public static MailAddress parseString( String mailPath ) {
 		int openAngle = mailPath.indexOf('<');
 		if( openAngle >= 0 ) {
