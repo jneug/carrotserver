@@ -40,6 +40,15 @@ Eine vollständige [Liste alle Konfigurationsoptionen](https://github.com/jneug/
 
 **CarrotServer** lässt sich einfach um weitere Protokolle erweitern. Die
 Erweiterungen können als java-Dateien im Daten-Ordner abgelegt werden und werden
-automatisch kompiliert und in die App integriert.
+automatisch kompiliert und in die App geladen.
 
 Details zur [Implementierung eigener Protokoll](https://github.com/jneug/carrotserver/wiki/Erweiterungen-programmieren) finden sich im Wiki.
+
+# Changelog
+
+## v0.0.10
+
+- POP3
+  - Fehlerhafte negative Rückmeldungen behoben.
+- SMTP
+  - Maildrop-Einstellung wird mit der Konfiguration von POP3 synchronisiert.

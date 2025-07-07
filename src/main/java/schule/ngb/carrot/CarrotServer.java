@@ -91,7 +91,7 @@ public class CarrotServer {
 	/**
 	 * Globale Version der App.
 	 */
-	public static final String APP_VERSION = "0.0.9";
+	public static final String APP_VERSION = "0.0.10";
 
 	/**
 	 * Globaler, einheitlicher Name der Konfigurationsdateien.
